@@ -1,6 +1,8 @@
 # Custom
 public/css/style.css
+public/courses/*
 data/*
+config.js
 
 # Logs
 logs

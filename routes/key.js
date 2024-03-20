@@ -3,10 +3,16 @@ const express = require("express"),
 
 // eslint-disable-next-line no-unused-vars
 router.get("/", async (req, res, next) => {
-	res.render("index", {
-		admins: await req.app.locals.admins,
-		user: req.user,
-	});
+	try {
+		res.render("key", {
+			admins: await req.app.locals.admins,
+			user: req.user,
+		});
+	} catch (error) {
+		res.redirect("/");
+
+		console.error(error);
+	}
 });
 
 module.exports = router;
