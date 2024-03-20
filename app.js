@@ -10,13 +10,14 @@ const createError = require("http-errors"),
 const { JsonDB, Config } = require("node-json-db");
 
 const config = require("./config");
-const db = new JsonDB(new Config("data/main_db", true, true, "/"));
+const db = new JsonDB(new Config(`data/${config.production ? "main" : "test"}_db`, true, true, "/"));
 
 if (!fs.existsSync("public/courses/")) { fs.mkdirSync("public/courses/"); }
 if (!fs.existsSync("data/")) { fs.mkdirSync("data/"); }
 
 const indexRouter = require("./routes/index"),
-	keyRouter = require("./routes/key");
+	keyRouter = require("./routes/key"),
+	adminRouter = require("./routes/admin");
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/key", keyRouter);
+app.use("/admin", adminRouter);
 app.get("/auth", passport.authenticate("steam"), () => {});
 app.get("/auth/return", passport.authenticate("steam", { failureRedirect: "/" }), function (req, res) {
 	res.redirect("/key");
@@ -90,10 +92,14 @@ app.use(function (err, req, res) {
 });
 
 // Locals
+db.getData("/admins").then(data => {
+	app.locals.admins = data;
+});
+
 app.locals = {
 	config: config,
 	db: db,
-	admins: db.getData("/admins"),
+	log: log,
 	sanitize: (string = "", force_lowercase = true, hard = false) => {
 		const strip = ["~", "`", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "=", "+", "[", "{", "]",
 			"}", "\\", "|", ";", ":", "\"", "'", "&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;",
@@ -104,6 +110,57 @@ app.locals = {
 
 		return force_lowercase ? clean.toLowerCase() : clean;
 	},
+	getKey: async (user) => {
+		const keys = await db.getData("/keys");
+		const key = keys[user.steamid];
+
+		if (key) {
+			await log(`[KEY] User logged in (SteamID: ${user.steamid}, Key ${key}).`);
+			return key;
+		} else
+			return createKey(user);
+	},
 };
+
+async function createKey(user) {
+	const keys = await db.getData("/keys");
+	const key = generateRandomString();
+	const isFound = keys[key];
+
+	if (!isFound) {
+		keys[user.steamid] = key;
+
+		await app.locals.log(`[KEY] New user (SteamID: ${user.steamid}, TimeCreated: ${user.timecreated}, Key: ${key}).`);
+		await db.push("/keys", keys);
+
+		return key;
+	} else
+		return await createKey(user);
+}
+
+function generateRandomString(length = 32) {
+	const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	const charactersLength = characters.length;
+	let counter = 0;
+	let result = "";
+
+	while (counter < length) {
+		result += characters.charAt(Math.floor(Math.random() * charactersLength));
+		counter += 1;
+	}
+
+	return result;
+}
+
+/**
+ *
+ * @param {String} message
+ */
+async function log(message) {
+	fs.writeFile("data/logs.log", `[${new Date(Date.now()).toLocaleString("ru-RU")}] - ${message}\n`, { flag: "a" }, err => {
+		if (err) throw err;
+		return true;
+	});
+}
 
 module.exports = app;

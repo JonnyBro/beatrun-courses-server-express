@@ -4,8 +4,8 @@ const express = require("express"),
 // eslint-disable-next-line no-unused-vars
 router.get("/", async (req, res, next) => {
 	res.render("index", {
-		admins: await req.app.locals.admins,
 		user: req.user,
+		locals: req.app.locals,
 	});
 });
 

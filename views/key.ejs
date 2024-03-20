@@ -29,7 +29,7 @@
 				</a>
 			</div>
 
-			<% if (user && admins[user.steamid]) { %>
+			<% if (user && locals.admins[user.steamid]) { %>
 				<div class="flex flex-col justify-center">
 					<a href="/admin" class="text-base text-white p-2 rounded-lg
 										hover:text-yellow-200 transition-all h-fit bg-opacity-10
@@ -79,7 +79,7 @@
 					<br><br>
 					Use this command below in console to save your API key in-game:
 					<br>
-					<b class="hover:text-yellow-200 transition-all">&emsp;beatrun_apikey <?php echo $_SESSION["beatrun_apikey"] ?></b>
+					<b class="hover:text-yellow-200 transition-all">&emsp;beatrun_apikey <%- user.authKey %></b>
 					<br>
 					And you're done!
 					<br><br>
@@ -94,8 +94,7 @@
 					Your authkey is:
 					<b>
 						<a title="Click to copy" id="key" class="hover:text-yellow-200 transition-all text-red-300" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText(this.innerText)">
-							<%- //user.authKey %>
-							<%- user.steamid %>
+							<%- user.authKey %>
 						</a>
 					</b>
 				</div>

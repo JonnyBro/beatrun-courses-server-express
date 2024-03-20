@@ -78,11 +78,11 @@
 				</div>
 
 				<div class="pb-2 text-base">
-					<?php if (!isset($_SESSION["steamid"])) { ?>
-					<a class="hover:text-yellow-200 transition-all text-red-300" href="/key">Authorize with Steam</a> to load and upload these courses in-game!
-					<?php } else { ?>
-					Welcome, <b class="hover:text-yellow-200 transition-all"><?php echo $usernames[$_SESSION["steamid"]] ?></b>!
-					<?php } ?>
+					<% if (!user) { %>
+						<a class="hover:text-yellow-200 transition-all text-red-300" href="/key">Authorize with Steam</a> to load and upload these courses in-game!
+					<% } else { %>
+						Welcome, <b class="hover:text-yellow-200 transition-all"><%- user.personaname %></b>!
+					<% } %>
 				</div>
 			</div>
 
