@@ -84,22 +84,39 @@ router.get("/", async (req, res) => {
 
 	codesData.forEach(data => cards.push(generateCourseCard(data)));
 
+	let sortedCards = [];
+
+	if (req.query.search) sortedCards = codesData.filter(c => {
+		const query = req.app.locals.sanitize(req.query.search.toString(), true, false);
+
+		let searchString = "";
+		searchString += c["name"];
+		searchString += c["code"];
+		searchString += c["userid"];
+		searchString += c["username"];
+		searchString += c["map"];
+		searchString += c["mapwid"];
+
+		console.log(searchString);
+		console.log(searchString.toLowerCase().includes(query));
+
+		return searchString.toLowerCase().includes(query);
+	});
+
 	let sortType = "none";
-	if (req.query.sort) sortType = req.app.locals.sanitize(req.query.sort, true, false);
+	if (req.query.sort) sortType = req.query.sort.toString();
 
 	const sortKeys = {
-		"date": "time",
-		"ratesmart": "scoresmart",
-		"ratedumb": "scoredumb",
-		"elementcount": "elements",
-		"coursename": "name",
-		"mapname": "map",
+		"0": ["time", "DESC"],
+		"1": ["name", "STRING"],
+		"2": ["map", "STRING"],
+		"3": ["elements", "DESC"],
+		"4": ["scoresmart", "DESC"],
+		"5": ["scoredumb", "DESC"],
 	};
 
-	let sortedCards = [];
 	if (sortType === "none") sortedCards = cards;
 	else {
-		console.log(req.query.sort);
 		const sortKey = sortKeys[sortType];
 
 		sortedCards = cards.sort((a, b) => {
@@ -109,19 +126,6 @@ router.get("/", async (req, res) => {
 		});
 	}
 
-	if (req.query.searchquery) sortedCards = sortedCards.filter(c => {
-		const query = req.app.locals.sanitize(req.query.searchquery.toString(), true, false);
-		let searchString = "";
-		searchString += c["name"];
-		searchString += c["code"];
-		searchString += c["userid"];
-		searchString += c["username"];
-		searchString += c["map"];
-		searchString += c["mapwid"];
-
-		return searchString.includes(query);
-	});
-
 	sortedCards = sortedCards.slice(Math.max((page - 1) * 20 - 1, 0), Math.max((page - 1) * 20 - 1, 0) + 20).join("\n");
 
 	res.render("index", {
@@ -129,6 +133,7 @@ router.get("/", async (req, res) => {
 		locals: req.app.locals,
 		pagesDropdown: pagesDropdownDone,
 		coursesList: sortedCards,
+		sorting: sortKeys[sortType],
 	});
 });
 

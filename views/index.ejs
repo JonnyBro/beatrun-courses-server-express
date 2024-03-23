@@ -32,6 +32,14 @@
 		function changePage(object) {
 			window.location.href = `/?page=${object.value}`;
 		}
+
+		function sort(object) {
+			window.location.href = `/?sort=${object.value}`;
+		}
+
+		function search(object) {
+			window.location.href = `/?search=${object.value}`;
+		}
 	</script>
 
 	<script src="https://unpkg.com/htmx.org@1.9.5"></script>
@@ -98,24 +106,24 @@
 
 				<div class="p-2">
 					<div class="pb-1 text-sm opacity-50">Sorting:</div>
-					<select name="sort" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white">
-						<option value="date">Date</option>
-						<option value="coursename">Course Name</option>
-						<option value="mapname">Map Name</option>
-						<option value="elementcount">Element count</option>
-						<option value="ratesmart">Rating (Smart)</option>
-						<option value="ratedumb">Rating (Dumb)</option>
+					<select name="sort" onchange="sort(this)" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white">
+						<option value="0">Date</option>
+						<option value="1">Course Name</option>
+						<option value="2">Map Name</option>
+						<option value="3">Element count</option>
+						<option value="4">Rating (Smart)</option>
+						<option value="5">Rating (Dumb)</option>
 					</select>
 				</div>
 
 				<div class="p-2">
 					<div class="pb-1 text-sm opacity-50">Search:</div>
-					<input name="searchquery" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white"></input>
+					<input id="searchquery" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white"></input>
 				</div>
 
 				<div class="p-2">
 					<div class="pb-1 text-sm opacity-0">lol</div>
-					<button class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all">Search</button>
+					<button class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" onclick="search(document.getElementById('searchquery'))">Search</button>
 				</div>
 			</div>
 

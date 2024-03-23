@@ -177,7 +177,7 @@ function sanitize(string = "", force_lowercase = true, strict = false) {
 		"â€”", "â€“", ",", "<", ".", ">", "/", "?" ];
 
 	let clean = string.trim().replace(strip, "").replace(/\s+/g, "-");
-	clean = strict ? string.replace(/[^\u0400-\u04FF\w\d\s]/g, "") : clean;
+	clean = strict ? string.replace(/[^\u0400-\u04FF\w\d\s-]/g, "") : clean;
 
 	return force_lowercase ? clean.toLowerCase() : clean;
 }
