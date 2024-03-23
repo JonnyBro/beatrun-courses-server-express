@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 const app = require("../app"),
-	http = require("http");
+	http = require("http"),
+	config = require("../config");
 
-const port = normalizePort(process.env.PORT || "6547");
+const port = normalizePort(config.port || "6547");
 app.set("port", port);
 
 const server = http.createServer(app);
