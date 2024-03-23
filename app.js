@@ -1,5 +1,4 @@
-const createError = require("http-errors"),
-	express = require("express"),
+const express = require("express"),
 	path = require("path"),
 	session = require("express-session"),
 	logger = require("morgan"),
@@ -17,7 +16,8 @@ if (!fs.existsSync("data/")) { fs.mkdirSync("data/"); }
 
 const indexRouter = require("./routes/index"),
 	keyRouter = require("./routes/key"),
-	adminRouter = require("./routes/admin");
+	adminRouter = require("./routes/admin"),
+	apiRouter = require("./routes/api");
 
 const app = express();
 
@@ -48,7 +48,7 @@ app.set("view engine", "ejs");
 
 app.use(logger("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(
 	session({
 		secret: config.cookieSecret,
@@ -67,6 +67,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/key", keyRouter);
 app.use("/admin", adminRouter);
+app.use("/api", apiRouter);
 app.get("/auth", passport.authenticate("steam"), () => {});
 app.get("/auth/return", passport.authenticate("steam", { failureRedirect: "/" }), function (req, res) {
 	res.redirect("/key");
@@ -80,16 +81,16 @@ app.get("/auth/logout", (req, res, next) => {
 });
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
-	next(createError(404));
-});
+// app.use(function (req, res, next) {
+// 	next(createError(404));
+// });
 
-// Error Handler
-app.use(function (err, req, res) {
-	// render the error page
-	res.status(err.status || 500);
-	res.render("error");
-});
+// // Error Handler
+// app.use(function (err, req, res) {
+// 	// render the error page
+// 	res.status(err.status || 500);
+// 	res.render("error");
+// });
 
 // Locals
 db.getData("/admins").then(data => {
@@ -100,29 +101,33 @@ app.locals = {
 	config: config,
 	db: db,
 	log: log,
-	sanitize: (string = "", force_lowercase = true, hard = false) => {
-		const strip = ["~", "`", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "=", "+", "[", "{", "]",
-			"}", "\\", "|", ";", ":", "\"", "'", "&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;",
-			"â€”", "â€“", ",", "<", ".", ">", "/", "?" ];
-
-		let clean = string.trim().replace(strip, "").replace(/\s+/g, "-");
-		clean = hard ? string.replace(/[^\u0400-\u04FF\w\d\s]/g, "") : clean;
-
-		return force_lowercase ? clean.toLowerCase() : clean;
-	},
-	getKey: async (user) => {
-		const keys = await db.getData("/keys");
-		const key = keys[user.steamid];
-
-		if (key) {
-			await log(`[KEY] User logged in (SteamID: ${user.steamid}, Key ${key}).`);
-			return key;
-		} else
-			return createKey(user);
-	},
+	sanitize: sanitize,
+	getKey: getKey,
 };
 
-async function createKey(user) {
+/**
+ * Creates/Finds key for Steam User and saves it to DB
+ * @param {*} user OpenID Steam User
+ * @returns {Promise<String>} User's auth key
+ */
+async function getKey(user) {
+	const keys = await db.getData("/keys");
+	const key = keys[user.steamid];
+
+	if (key) {
+		await log(`[KEY] User logged in (SteamID: ${user.steamid}, Key ${key}).`);
+		return key;
+	} else
+		return await _createKey(user);
+}
+
+/**
+ * Used internally by getKey().
+ * Dont use on it's own!
+ * @param {*} user OpenID Steam User
+ * @returns {Promise<String>} User's auth key
+ */
+async function _createKey(user) {
 	const keys = await db.getData("/keys");
 	const key = generateRandomString();
 	const isFound = keys[key];
@@ -135,9 +140,14 @@ async function createKey(user) {
 
 		return key;
 	} else
-		return await createKey(user);
+		return await _createKey(user);
 }
 
+/**
+ * Generates random string with given length
+ * @param {Number} length Length for random string
+ * @returns {String} String
+ */
 function generateRandomString(length = 32) {
 	const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	const charactersLength = characters.length;
@@ -153,8 +163,28 @@ function generateRandomString(length = 32) {
 }
 
 /**
- *
- * @param {String} message
+ * Sanitizes a given string
+ * @param {String} string String to sanitize
+ * @param {Boolean} force_lowercase Force lowercase on return
+ * @param {Boolean} strict Remove any symbols that are not letters, numbers or underscores
+ * @returns {String} Sanitized string
+ */
+function sanitize(string = "", force_lowercase = true, strict = false) {
+	string = string.toString();
+
+	const strip = ["~", "`", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "=", "+", "[", "{", "]",
+		"}", "\\", "|", ";", ":", "\"", "'", "&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;",
+		"â€”", "â€“", ",", "<", ".", ">", "/", "?" ];
+
+	let clean = string.trim().replace(strip, "").replace(/\s+/g, "-");
+	clean = strict ? string.replace(/[^\u0400-\u04FF\w\d\s]/g, "") : clean;
+
+	return force_lowercase ? clean.toLowerCase() : clean;
+}
+
+/**
+ * Saves given message to logs file
+ * @param {String} message Message to log
  */
 async function log(message) {
 	fs.writeFile("data/logs.log", `[${new Date(Date.now()).toLocaleString("ru-RU")}] - ${message}\n`, { flag: "a" }, err => {

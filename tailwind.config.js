@@ -2,5 +2,6 @@
 module.exports = {
 	content: [
 		"./views/*.ejs",
+		"./components/*.html",
 	],
 };

@@ -8,8 +8,7 @@ function isAdmin(req, res, next) {
 
 const response = "xd";
 
-// eslint-disable-next-line no-unused-vars
-router.get("/", isAdmin, async (req, res, next) => {
+router.get("/", isAdmin, async (req, res) => {
 	res.render("admin", {
 		user: req.user,
 		locals: req.app.locals,

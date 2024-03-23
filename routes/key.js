@@ -2,8 +2,7 @@ const express = require("express"),
 	router = express.Router(),
 	fetch = require("node-fetch");
 
-// eslint-disable-next-line no-unused-vars
-router.get("/", async (req, res, next) => {
+router.get("/", async (req, res) => {
 	if (req.user) {
 		req.user.authKey = await registerUser(req.app, req.user);
 	}
