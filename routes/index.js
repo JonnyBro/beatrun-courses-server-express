@@ -11,11 +11,15 @@ router.get("/", async (req, res) => {
 
 	/* Pages Count */
 	const coursesCount = Object.keys(courses).length;
-	const pagesCount = Math.max(Math.floor(coursesCount / 20), 0);
+	const pagesCount = Math.max(Math.ceil(coursesCount / 20), 0);
+	let page = 1;
+	if (req.query.page) page = req.query.page.toString();
+	if (page * 20 - coursesCount >= 20) page = 1;
+
 	let options = "";
 
 	for (let i = 1; i <= pagesCount; i++) {
-		if (req.query.page && req.query.page.toString() === i.toString())
+		if (page === i.toString())
 			options += `<option selected value="${i}">${i}</option>`;
 		else
 			options += `<option value="${i}">${i}</option>`;
@@ -106,7 +110,7 @@ router.get("/", async (req, res) => {
 	}
 
 	if (req.query.searchquery) sortedCards = sortedCards.filter(c => {
-		const query = req.app.locals.sanitize(req.query.searchquery, true, false);
+		const query = req.app.locals.sanitize(req.query.searchquery.toString(), true, false);
 		let searchString = "";
 		searchString += c["name"];
 		searchString += c["code"];
@@ -118,11 +122,7 @@ router.get("/", async (req, res) => {
 		return searchString.includes(query);
 	});
 
-	let page = 0;
-	if (req.query.page) page = req.query.page;
-	if (page * 20 > sortedCards.length) page = 0;
-
-	sortedCards = sortedCards.splice(Math.max((page - 1) * 20 - 1, 0), Math.max((page - 1) * 20 - 1, 0) + 20).join("\n");
+	sortedCards = sortedCards.slice(Math.max((page - 1) * 20 - 1, 0), Math.max((page - 1) * 20 - 1, 0) + 20).join("\n");
 
 	res.render("index", {
 		user: req.user,
