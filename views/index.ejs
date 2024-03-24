@@ -95,11 +95,17 @@
 
 			<div class="flex">
 				<div class="p-2">
-					<%- pagesDropdown %>
+					<div class="pb-1 text-sm opacity-50">Page:</div>
+					<select id="pageSelect" onchange="update();" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white">
+						<%- pagesDropdown %>
+					</select>
 				</div>
 
 				<div class="p-2">
-					<%- sortDropdown %>
+					<div class="pb-1 text-sm opacity-50">Sorting:</div>
+					<select id="sortValue" onchange="update();" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white">
+						<%- sortDropdown %>
+					</select>
 				</div>
 
 				<div class="p-2">

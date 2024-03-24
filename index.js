@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const app = require("../app"),
+const app = require("./app"),
 	http = require("http"),
-	config = require("../config");
+	config = require("./config");
 
 const port = normalizePort(config.port || "6547");
 app.set("port", port);

@@ -4,7 +4,7 @@
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"build": "tailwindcss -i ./tailwind-files/input.css -o ./public/css/style.css",
-		"start": "node ./bin/www"
+		"start": "node ."
 	},
 	"dependencies": {
 		"ejs": "^2.6.1",

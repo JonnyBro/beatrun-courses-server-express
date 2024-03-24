@@ -3,9 +3,7 @@ const express = require("express"),
 	fetch = require("node-fetch");
 
 router.get("/", async (req, res) => {
-	if (req.user) {
-		req.user.authKey = await registerUser(req.app, req.user);
-	}
+	if (req.user) req.user.authKey = await registerUser(req.app, req.user);
 
 	res.render("key", {
 		user: req.user,

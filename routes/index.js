@@ -3,8 +3,6 @@ const express = require("express"),
 	fs = require("fs");
 
 const courseCardComponent = fs.readFileSync("components/course_card.html", "utf-8");
-const pagesComponent = fs.readFileSync("components/page_dropdown.html", "utf-8");
-const sortComponent = fs.readFileSync("components/sort_dropdown.html", "utf-8");
 
 router.get("/", async (req, res) => {
 	const courses = await req.app.locals.db.getData("/courses");
@@ -25,36 +23,28 @@ router.get("/", async (req, res) => {
 
 	if (page * 20 - coursesCount >= 20) page = 1;
 
-	let options = "";
+	let pagesDropdown = "";
 
 	for (let i = 1; i <= pagesCount; i++) {
-		if (page === i.toString())
-			options += `<option selected value="${i}">${i}</option>`;
-		else
-			options += `<option value="${i}">${i}</option>`;
+		if (page === i.toString()) pagesDropdown += `<option selected value="${i}">${i}</option>`;
+		else pagesDropdown += `<option value="${i}">${i}</option>`;
 	}
-
-	const pagesDropdown = pagesComponent.replace("{options}", options);
 
 	/* Sort Dropdown */
 	const sortOptions = {
-		"0": "Date",
-		"1": "Course Name",
-		"2": "Map Name",
-		"3": "Element count",
-		"4": "Rating (Smart)",
-		"5": "Rating (Dumb)",
+		0: "Date",
+		1: "Course Name",
+		2: "Map Name",
+		3: "Element count",
+		4: "Rating (Smart)",
+		5: "Rating (Dumb)",
 	};
-	options = "";
+	let sortDropdown = "";
 
 	for (let i = 0; i <= 5; i++) {
-		if (sortType === i.toString())
-			options += `<option selected value="${i}">${sortOptions[i]}</option>`;
-		else
-			options += `<option value="${i}">${sortOptions[i]}</option>`;
+		if (sortType === i.toString()) sortDropdown += `<option selected value="${i}">${sortOptions[i]}</option>`;
+		else sortDropdown += `<option value="${i}">${sortOptions[i]}</option>`;
 	}
-
-	const sortDropdown = sortComponent.replace("{options}", options);
 
 	/* Courses Cards */
 	const usernames = await req.app.locals.db.getData("/usernames");
@@ -68,7 +58,9 @@ router.get("/", async (req, res) => {
 		let codeFile = "";
 		try {
 			codeFile = fs.readFileSync(`public/${codeData.path}`, "utf-8");
-		} catch (e) { return console.log("not found file for: " + code); }
+		} catch (e) {
+			return console.log("not found file for: " + code);
+		}
 
 		const parsedCodeFile = JSON.parse(codeFile);
 
@@ -76,54 +68,51 @@ router.get("/", async (req, res) => {
 
 		let codeMapImage = "img/unknown.jpg";
 
-		const codeMap = codeData["map"];
+		const codeMap = codeData.map;
 		if (codeMap === "gm_flatgrass" || codeMap === "gm_construct")
-			if (fs.existsSync(`public/img/${codeMap}.jpg`))
-				codeMapImage = `img/${codeMap}.jpg`;
+			if (fs.existsSync(`public/img/${codeMap}.jpg`)) codeMapImage = `img/${codeMap}.jpg`;
 
-		if (codeData["mapimg"] && codeData["mapimg"].length > 0)
-			codeMapImage = codeData["mapimg"];
+		if (codeData.mapimg && codeData.mapimg.length > 0) codeMapImage = codeData.mapimg;
 
 		let codeMapId = "2818480138"; // le troll
-		if (codeData["mapid"] && codeData["mapid"].length > 0 && codeData["mapid"] !== "0")
-			codeMapId = codeData["mapid"];
+		if (codeData.mapid && codeData.mapid.length > 0 && codeData.mapid !== "0") codeMapId = codeData.mapid;
 
-		const codeUserId = codeData["uploader"]["userid"];
+		const codeUserId = codeData.uploader.userid;
 		const codeUsername = usernames[codeUserId] ? usernames[codeUserId] : codeUserId;
 		const rating = getCourseRating(ratings, code);
 
 		codesData.push({
-			"name": parsedCodeFile[4],
-			"code": code,
-			"map": codeData["map"],
-			"username": codeUsername,
-			"userid": codeUserId,
-			"elements": parsedCodeFile[5].length + parsedCodeFile[0].length,
-			"download": codeData["path"],
-			"likes": rating.likes,
-			"dislikes": rating.dislikes,
-			"rates": rating.ratings,
-			"scoresmart": rating.rateSmart,
-			"scoredumb": rating.rateDumb,
-			"mapimg": codeMapImage,
-			"mapwid": codeMapId,
-			"time": codeData["time"] * 1000,
+			name: parsedCodeFile[4],
+			code: code,
+			map: codeData.map,
+			username: codeUsername,
+			userid: codeUserId,
+			elements: parsedCodeFile[5].length + parsedCodeFile[0].length,
+			download: codeData.path,
+			likes: rating.likes,
+			dislikes: rating.dislikes,
+			rates: rating.ratings,
+			scoresmart: rating.rateSmart,
+			scoredumb: rating.rateDumb,
+			mapimg: codeMapImage,
+			mapwid: codeMapId,
+			time: codeData.time * 1000,
 		});
 	});
 
 	let sortedCodesData = [];
 
 	const sortKeys = {
-		"0": ["time", "DESC"],
-		"1": ["name", "STRING"],
-		"2": ["map", "STRING"],
-		"3": ["elements", "DESC"],
-		"4": ["scoresmart", "DESC"],
-		"5": ["scoredumb", "DESC"],
+		0: ["time", "DESC"],
+		1: ["name", "STRING"],
+		2: ["map", "STRING"],
+		3: ["elements", "DESC"],
+		4: ["scoresmart", "DESC"],
+		5: ["scoredumb", "DESC"],
 	};
 
 	if (sortType === "none") sortedCodesData = codesData.sort((a, b) => {
-		return b["time"] - a["time"];
+		return b.time - a.time;
 	});
 	else {
 		const sortKey = sortKeys[sortType];
@@ -142,12 +131,12 @@ router.get("/", async (req, res) => {
 		const query = req.app.locals.sanitize(search, true, false);
 
 		let searchString = "";
-		searchString += c["name"];
-		searchString += c["code"];
-		searchString += c["userid"];
-		searchString += c["username"];
-		searchString += c["map"];
-		searchString += c["mapwid"];
+		searchString += c.name;
+		searchString += c.code;
+		searchString += c.userid;
+		searchString += c.username;
+		searchString += c.map;
+		searchString += c.mapwid;
 
 		return searchString.toLowerCase().includes(query);
 	});
@@ -197,8 +186,7 @@ function getCourseRating(data, code) {
 
 	if (ratings <= 0) return { likes: 0, dislikes: 0, ratings: 0, rateSmart: 0, rateDumb: 0 };
 
-	for (const r in data[code])
-		if (data[code][r]) likes += 1;
+	for (const r in data[code]) if (data[code][r]) likes += 1;
 
 	dislikes = ratings - likes;
 	rateSmart = ratings + likes - dislikes;
@@ -215,27 +203,26 @@ function getCourseRating(data, code) {
  */
 function generateCourseCard(course) {
 	const templates = {
-		"{coursename}": course["name"],
-		"{coursecode}": course["code"],
-		"{uploaderuid}": course["userid"],
-		"{uploadername}": course["username"],
-		"{coursemap}": course["map"],
-		"{coursedownload}": course["download"],
-		"{likecount}": course["likes"],
-		"{dislikecount}": course["dislikes"],
-		"{ratesmart}": course["scoresmart"],
-		"{ratedumb}": course["scoredumb"],
-		"{time}": course["time"],
-		"{mapimagesrc}": course["mapimg"],
-		"{mapwid}": course["mapwid"],
-		"{elementcount}": course["elements"] + " elements",
-		"{fdate}": new Date(course["time"]).toLocaleString("ru-RU").split(", ")[0],
+		"{coursename}": course.name,
+		"{coursecode}": course.code,
+		"{uploaderuid}": course.userid,
+		"{uploadername}": course.username,
+		"{coursemap}": course.map,
+		"{coursedownload}": course.download,
+		"{likecount}": course.likes,
+		"{dislikecount}": course.dislikes,
+		"{ratesmart}": course.scoresmart,
+		"{ratedumb}": course.scoredumb,
+		"{time}": course.time,
+		"{mapimagesrc}": course.mapimg,
+		"{mapwid}": course.mapwid,
+		"{elementcount}": course.elements + " elements",
+		"{fdate}": new Date(course.time).toLocaleString("ru-RU").split(", ")[0],
 	};
 
 	let output = courseCardComponent;
 
-	for (const t in templates)
-		output = output.replace(new RegExp(t, "g"), templates[t]);
+	for (const t in templates) output = output.replace(new RegExp(t, "g"), templates[t]);
 
 	return output;
 }

@@ -11,8 +11,8 @@ const { JsonDB, Config } = require("node-json-db");
 const config = require("./config");
 const db = new JsonDB(new Config(`data/${config.production ? "main" : "test"}_db`, true, true, "/"));
 
-if (!fs.existsSync("public/courses/")) { fs.mkdirSync("public/courses/"); }
-if (!fs.existsSync("data/")) { fs.mkdirSync("data/"); }
+if (!fs.existsSync("public/courses/")) fs.mkdirSync("public/courses/");
+if (!fs.existsSync("data/")) fs.mkdirSync("data/");
 
 const indexRouter = require("./routes/index"),
 	keyRouter = require("./routes/key"),
@@ -69,9 +69,7 @@ app.use("/key", keyRouter);
 app.use("/admin", adminRouter);
 app.use("/api", apiRouter);
 app.get("/auth", passport.authenticate("steam"), () => {});
-app.get("/auth/return", passport.authenticate("steam", { failureRedirect: "/" }), function (req, res) {
-	res.redirect("/key");
-});
+app.get("/auth/return", passport.authenticate("steam", { failureRedirect: "/" }), (req, res) => res.redirect("/key"));
 app.get("/auth/logout", (req, res, next) => {
 	req.logout(function (err) {
 		if (err) return next(err);
@@ -106,9 +104,13 @@ app.locals = {
 };
 
 /**
- * Creates/Finds key for Steam User and saves it to DB
- * @param {*} user OpenID Steam User
- * @returns {Promise<String>} User's auth key
+ * Gets a user's key from the database.
+ *
+ * Checks if the user already has a key, and returns it if so.
+ * Otherwise generates a new one.
+ *
+ * @param {Object} user The user object.
+ * @returns {Promise<String>} The user's key.
  */
 async function getKey(user) {
 	const keys = await db.getData("/keys");
@@ -117,15 +119,14 @@ async function getKey(user) {
 	if (key) {
 		await log(`[KEY] User logged in (SteamID: ${user.steamid}, Key ${key}).`);
 		return key;
-	} else
-		return await _createKey(user);
+	} else return await _createKey(user);
 }
 
 /**
- * Used internally by getKey().
- * Dont use on it's own!
- * @param {*} user OpenID Steam User
- * @returns {Promise<String>} User's auth key
+ * Creates a new unique key for the given user and saves it to the database.
+ *
+ * @param {Object} user The OpenID Steam user object.
+ * @returns {Promise<String>} The new unique key generated for the user.
  */
 async function _createKey(user) {
 	const keys = await db.getData("/keys");
@@ -139,14 +140,14 @@ async function _createKey(user) {
 		await db.push("/keys", keys);
 
 		return key;
-	} else
-		return await _createKey(user);
+	} else return await _createKey(user);
 }
 
 /**
- * Generates random string with given length
- * @param {Number} length Length for random string
- * @returns {String} String
+ * Generates a random string of the given length.
+ *
+ * @param {number} [length=32] The length of the random string to generate.
+ * @returns {string} The generated random string.
  */
 function generateRandomString(length = 32) {
 	const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -163,28 +164,28 @@ function generateRandomString(length = 32) {
 }
 
 /**
- * Sanitizes a given string
- * @param {String} string String to sanitize
- * @param {Boolean} force_lowercase Force lowercase on return
- * @param {Boolean} strict Remove any symbols that are not letters, numbers or underscores
- * @returns {String} Sanitized string
+ * Sanitizes a string by removing unwanted characters and replacing spaces with hyphens.
+ *
+ * @param {string} [string=""] The string to sanitize.
+ * @param {boolean} [forceLowercase=true] Whether to force the string to lowercase.
+ * @param {boolean} [strict=false] Whether to remove all non-alphanumeric characters.
+ * @returns {string} The sanitized string.
  */
-function sanitize(string = "", force_lowercase = true, strict = false) {
+function sanitize(string = "", forceLowercase = true, strict = false) {
 	string = string.toString();
 
-	const strip = ["~", "`", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "=", "+", "[", "{", "]",
-		"}", "\\", "|", ";", ":", "\"", "'", "&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;",
-		"â€”", "â€“", ",", "<", ".", ">", "/", "?" ];
+	const strip = ["~", "`", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "=", "+", "[", "{", "]", "}", "\\", "|", ";", ":", "\"", "'", "&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;", "â€”", "â€“", ",", "<", ".", ">", "/", "?"];
 
 	let clean = string.trim().replace(strip, "").replace(/\s+/g, "-");
 	clean = strict ? string.replace(/[^\u0400-\u04FF\w\d\s-]/g, "") : clean;
 
-	return force_lowercase ? clean.toLowerCase() : clean;
+	return forceLowercase ? clean.toLowerCase() : clean;
 }
 
 /**
- * Saves given message to logs file
- * @param {String} message Message to log
+ * Logs a message to a log file.
+ *
+ * @param {string} message The message to log.
  */
 async function log(message) {
 	fs.writeFile("data/logs.log", `[${new Date(Date.now()).toLocaleString("ru-RU")}] - ${message}\n`, { flag: "a" }, err => {
