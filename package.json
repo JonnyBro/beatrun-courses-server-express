@@ -3,7 +3,6 @@
 	"version": "1.0.0",
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
-		"postinstall": "pnpm build",
 		"build": "tailwindcss -i ./tailwind-files/input.css -o ./public/css/style.css",
 		"start": "node ./bin/www"
 	},
