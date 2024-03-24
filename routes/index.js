@@ -4,16 +4,25 @@ const express = require("express"),
 
 const courseCardComponent = fs.readFileSync("components/course_card.html", "utf-8");
 const pagesComponent = fs.readFileSync("components/page_dropdown.html", "utf-8");
+const sortComponent = fs.readFileSync("components/sort_dropdown.html", "utf-8");
 
 router.get("/", async (req, res) => {
 	const courses = await req.app.locals.db.getData("/courses");
 	const codes = Object.keys(courses);
 
+	let sortType = "none";
+	if (req.query.sort) sortType = req.query.sort.toString();
+
+	let page = 1;
+	if (req.query.page) page = req.query.page.toString();
+
+	let search = "";
+	if (req.query.search) search = req.query.search.toString();
+
 	/* Pages Count */
 	const coursesCount = Object.keys(courses).length;
 	const pagesCount = Math.max(Math.ceil(coursesCount / 20), 0);
-	let page = 1;
-	if (req.query.page) page = req.query.page.toString();
+
 	if (page * 20 - coursesCount >= 20) page = 1;
 
 	let options = "";
@@ -25,7 +34,27 @@ router.get("/", async (req, res) => {
 			options += `<option value="${i}">${i}</option>`;
 	}
 
-	const pagesDropdownDone = pagesComponent.replace("{options}", options);
+	const pagesDropdown = pagesComponent.replace("{options}", options);
+
+	/* Sort Dropdown */
+	const sortOptions = {
+		"0": "Date",
+		"1": "Course Name",
+		"2": "Map Name",
+		"3": "Element count",
+		"4": "Rating (Smart)",
+		"5": "Rating (Dumb)",
+	};
+	options = "";
+
+	for (let i = 0; i <= 5; i++) {
+		if (sortType === i.toString())
+			options += `<option selected value="${i}">${sortOptions[i]}</option>`;
+		else
+			options += `<option value="${i}">${sortOptions[i]}</option>`;
+	}
+
+	const sortDropdown = sortComponent.replace("{options}", options);
 
 	/* Courses Cards */
 	const usernames = await req.app.locals.db.getData("/usernames");
@@ -82,29 +111,7 @@ router.get("/", async (req, res) => {
 		});
 	});
 
-	codesData.forEach(data => cards.push(generateCourseCard(data)));
-
-	let sortedCards = [];
-
-	if (req.query.search) sortedCards = codesData.filter(c => {
-		const query = req.app.locals.sanitize(req.query.search.toString(), true, false);
-
-		let searchString = "";
-		searchString += c["name"];
-		searchString += c["code"];
-		searchString += c["userid"];
-		searchString += c["username"];
-		searchString += c["map"];
-		searchString += c["mapwid"];
-
-		console.log(searchString);
-		console.log(searchString.toLowerCase().includes(query));
-
-		return searchString.toLowerCase().includes(query);
-	});
-
-	let sortType = "none";
-	if (req.query.sort) sortType = req.query.sort.toString();
+	let sortedCodesData = [];
 
 	const sortKeys = {
 		"0": ["time", "DESC"],
@@ -115,25 +122,47 @@ router.get("/", async (req, res) => {
 		"5": ["scoredumb", "DESC"],
 	};
 
-	if (sortType === "none") sortedCards = cards;
+	if (sortType === "none") sortedCodesData = codesData.sort((a, b) => {
+		return b["time"] - a["time"];
+	});
 	else {
 		const sortKey = sortKeys[sortType];
 
-		sortedCards = cards.sort((a, b) => {
-			const aVal = a[sortKey];
-			const bVal = b[sortKey];
-			return aVal > bVal ? -1 : 1;
-		});
+		if (sortKey[1] === "STRING")
+			sortedCodesData = codesData.sort((a, b) => {
+				return a[sortKey[0]].localeCompare(b[sortKey[0]]);
+			});
+		else if (sortKey[1] === "DESC")
+			sortedCodesData = codesData.sort((a, b) => {
+				return b[sortKey[0]] - a[sortKey[0]];
+			});
 	}
 
-	sortedCards = sortedCards.slice(Math.max((page - 1) * 20 - 1, 0), Math.max((page - 1) * 20 - 1, 0) + 20).join("\n");
+	if (search) sortedCodesData = codesData.filter(c => {
+		const query = req.app.locals.sanitize(search, true, false);
+
+		let searchString = "";
+		searchString += c["name"];
+		searchString += c["code"];
+		searchString += c["userid"];
+		searchString += c["username"];
+		searchString += c["map"];
+		searchString += c["mapwid"];
+
+		return searchString.toLowerCase().includes(query);
+	});
+
+	sortedCodesData.forEach(data => cards.push(generateCourseCard(data)));
+
+	const sortedCards = cards.slice(Math.max((page - 1) * 20 - 1, 0), Math.max((page - 1) * 20 - 1, 0) + 20).join("\n");
 
 	res.render("index", {
 		user: req.user,
 		locals: req.app.locals,
-		pagesDropdown: pagesDropdownDone,
+		pagesDropdown: pagesDropdown,
+		sortDropdown: sortDropdown,
 		coursesList: sortedCards,
-		sorting: sortKeys[sortType],
+		searchText: search,
 	});
 });
 

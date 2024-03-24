@@ -1,9 +1,11 @@
 const express = require("express"),
 	router = express.Router();
 
-function isAdmin(req, res, next) {
-	if (req.user && req.app.locals.admins[req.user.steamid]) return next();
-	else if (!req.user || !req.app.locals.admins[req.user.steamid]) return res.redirect("/key");
+async function isAdmin(req, res, next) {
+	const admins = req.app.locals.admins;
+
+	if (req.user && admins[req.user.steamid]) return next();
+	else if (!req.user || !admins[req.user.steamid]) return res.redirect("/key");
 }
 
 const response = "xd";

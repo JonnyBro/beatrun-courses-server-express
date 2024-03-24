@@ -32,7 +32,7 @@ passport.deserializeUser((obj, done) => {
 passport.use(
 	new SteamStrategy(
 		{
-			realm: `${config.domain}`,
+			realm: config.domain,
 			returnURL: `${config.domain}/auth/return`,
 			apiKey: config.steamKey,
 		},

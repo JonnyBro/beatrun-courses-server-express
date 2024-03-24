@@ -29,20 +29,14 @@
 	</style>
 
 	<script>
-		function changePage(object) {
-			window.location.href = `/?page=${object.value}`;
-		}
+		function update() {
+			const page = document.getElementById("pageSelect");
+			const sort = document.getElementById("sortValue");
+			const search = document.getElementById("searchQuery");
 
-		function sort(object) {
-			window.location.href = `/?sort=${object.value}`;
-		}
-
-		function search(object) {
-			window.location.href = `/?search=${object.value}`;
+			window.location.href = `/?page=${page.value}&sort=${sort.value}&search=${search.value}`;
 		}
 	</script>
-
-	<script src="https://unpkg.com/htmx.org@1.9.5"></script>
 </head>
 
 <body class="w-screen h-screen bg-stone-900 overflow-x-hidden">
@@ -105,25 +99,18 @@
 				</div>
 
 				<div class="p-2">
-					<div class="pb-1 text-sm opacity-50">Sorting:</div>
-					<select name="sort" onchange="sort(this)" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white">
-						<option value="0">Date</option>
-						<option value="1">Course Name</option>
-						<option value="2">Map Name</option>
-						<option value="3">Element count</option>
-						<option value="4">Rating (Smart)</option>
-						<option value="5">Rating (Dumb)</option>
-					</select>
+					<%- sortDropdown %>
 				</div>
 
 				<div class="p-2">
 					<div class="pb-1 text-sm opacity-50">Search:</div>
-					<input id="searchquery" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white"></input>
+					<input onkeyup="if (event.key === 'Enter') update();" id="searchQuery" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white"></input>
+					<script> document.getElementById('searchQuery').value = '<%= searchText %>' </script>
 				</div>
 
 				<div class="p-2">
-					<div class="pb-1 text-sm opacity-0">lol</div>
-					<button class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" onclick="search(document.getElementById('searchquery'))">Search</button>
+					<div class="pb-1 text-sm opacity-0">what are you looking for?</div>
+					<button class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" onclick="update();">Search</button>
 				</div>
 			</div>
 
