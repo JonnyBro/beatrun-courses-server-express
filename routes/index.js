@@ -78,7 +78,7 @@ router.get("/", async (req, res) => {
 
 		const codeMap = codeData["map"];
 		if (codeMap === "gm_flatgrass" || codeMap === "gm_construct")
-			if (fs.existsSync(`img/${codeMap}.jpg`))
+			if (fs.existsSync(`public/img/${codeMap}.jpg`))
 				codeMapImage = `img/${codeMap}.jpg`;
 
 		if (codeData["mapimg"] && codeData["mapimg"].length > 0)
