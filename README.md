@@ -8,4 +8,5 @@ This is project is a rewrite of the [original](https://github.com/JonnyBro/beatr
 1. `git clone git.jonnybro.ru/jonny_bro/beatrun-courses-server-express courses-server && cd courses-server`
    1. Copy `config.example.js` to `config.js` and configure it.
 2. `pnpm install`
-3. `pnpm start`
+3. `pnpm build`
+4. `pnpm start`
