@@ -167,7 +167,6 @@ function isCourseFileValid(content) {
  * If the IP already has a recent rate limit, returns true.
  * Otherwise, saves a new rate limit for the IP and returns false.
  *
- * @param {Object} db Database instance
  * @param {string} ip The IP address to check
  * @returns {Promise<boolean>} Whether the IP is currently rate limited
  */
