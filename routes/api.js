@@ -11,7 +11,7 @@ async function isAdmin(req, res, next) {
 	const admins = req.app.locals.admins;
 	const key = req.user.authKey;
 
-	if (!admins[steamIds[key]]) return res.status(401).json({ message: "Unauthorized." });
+	if (!admins[steamIds[key]]) return res.status(401).json({ res: res.statusCode, message: "Unauthorized." });
 
 	return next();
 }
@@ -23,20 +23,20 @@ async function isUser(req, res, next) {
 	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
 	const key = req.user.authKey;
 
-	if (!steamIds[key]) return res.status(401).json({ message: "Unauthorized." });
+	if (!steamIds[key]) return res.status(401).json({ res: res.statusCode, message: "Unauthorized." });
 
 	return next();
 }
 
 async function isUserGame(req, res, next) {
-	// if (req.get("user-agent") !== "Valve/Steam HTTP Client 1.0 GMod/13") return res.status(401).json({ message: "Not in-game" });
+	// if (req.get("user-agent") !== "Valve/Steam HTTP Client 1.0 GMod/13") return res.status(401).json({ res: res.statusCode, message: "Not in-game" });
 
 	const keys = await req.app.locals.db.getData("/keys");
 	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
 	const key = req.headers.authorization;
 
-	if (!key) return res.status(401).json({ message: "Unauthorized. Please provide a key." });
-	if (!steamIds[key]) return res.status(401).json({ message: `Unauthorized. Get yourself a key on ${req.app.locals.config.domain}/key` });
+	if (!key) return res.status(401).json({ res: res.statusCode, message: "Unauthorized. Please provide a key." });
+	if (!steamIds[key]) return res.status(401).json({ res: res.statusCode, message: `Unauthorized. Get yourself a key on ${req.app.locals.config.domain}/key` });
 
 	return next();
 }
@@ -51,8 +51,8 @@ router.get("/", isUser, async (req, res) => {
 
 router.get("/download", isUserGame, async (req, res) => {
 	const headers = req.headers;
-	if (!headers.code) return res.status(401).json({ message: "No code provided. Please provide a valid course code." });
-	if (!headers.map) return res.status(401).json({ message: "No map provided. Please provide a valid map." });
+	if (!headers.code) return res.status(401).json({ res: res.statusCode, message: "No code provided. Please provide a valid course code." });
+	if (!headers.map) return res.status(401).json({ res: res.statusCode, message: "No map provided. Please provide a valid map." });
 
 	const ip = req.headers["cf-connecting-ip"] || "Unknown";
 	const key = headers.authorization;
@@ -60,12 +60,12 @@ router.get("/download", isUserGame, async (req, res) => {
 	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
 	const steamid = steamIds[key];
 
-	if (ip !== "Unknown" && (await req.app.locals.isRatelimited(ip))) return res.status(401).json({ message: "Too many requests. Please try again later." });
-	if (ip !== "Unknown" && (await req.app.locals.isMultiAccount(ip, steamid))) return res.status(401).json({ message: "Your account was detected as multiaccount. Please open a ticket on our Discord server." });
+	if (ip !== "Unknown" && (await req.app.locals.isRatelimited(ip))) return res.status(401).json({ res: res.statusCode, message: "Too many requests. Please try again later." });
+	if (ip !== "Unknown" && (await req.app.locals.isMultiAccount(ip, steamid))) return res.status(401).json({ res: res.statusCode, message: "Your account was detected as multiaccount. Please open a ticket on our Discord server." });
 
 	const courseData = await req.app.locals.db.getData(`/courses/${headers.code}`);
 
-	if (courseData.map !== headers.map) return res.status(401).json({ message: "Invalid map. Please start a map that require by course you provided." });
+	if (courseData.map !== headers.map) return res.status(401).json({ res: res.statusCode, message: "Invalid map. Please start a map that require by course you provided." });
 
 	const file = fs.readFileSync(`public/${courseData.path}`, "utf-8");
 
@@ -75,9 +75,9 @@ router.get("/download", isUserGame, async (req, res) => {
 
 router.post("/upload", isUserGame, async (req, res) => {
 	const headers = req.headers;
-	if (!headers.course) return res.status(401).json({ message: "No course provided. Please provide a valid course." });
-	if (!headers.map) return res.status(401).json({ message: "No map provided. Please provide a valid map." });
-	if (headers.mapid === null || headers.mapid === undefined) return res.status(401).json({ message: "No map id provided. Please provide a valid map id." });
+	if (!headers.course) return res.status(401).json({ res: res.statusCode, message: "No course provided. Please provide a valid course." });
+	if (!headers.map) return res.status(401).json({ res: res.statusCode, message: "No map provided. Please provide a valid map." });
+	if (headers.mapid === null || headers.mapid === undefined) return res.status(401).json({ res: res.statusCode, message: "No map id provided. Please provide a valid map id." });
 
 	const ip = req.headers["cf-connecting-ip"] || "Unknown";
 	const key = headers.authorization;
@@ -85,11 +85,11 @@ router.post("/upload", isUserGame, async (req, res) => {
 	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
 	const steamid = steamIds[key];
 
-	if (ip !== "Unknown" && (await req.app.locals.isRatelimited(ip))) return res.status(401).json({ message: "Too many requests. Please try again later." });
-	if (ip !== "Unknown" && (await req.app.locals.isMultiAccount(ip, steamid))) return res.status(401).json({ message: "Your account was detected as multiaccount. Please open a ticket on our Discord server." });
+	if (ip !== "Unknown" && (await req.app.locals.isRatelimited(ip))) return res.status(401).json({ res: res.statusCode, message: "Too many requests. Please try again later." });
+	if (ip !== "Unknown" && (await req.app.locals.isMultiAccount(ip, steamid))) return res.status(401).json({ res: res.statusCode, message: "Your account was detected as multiaccount. Please open a ticket on our Discord server." });
 
 	const course = Buffer.from(headers.course, "base64").toString("utf-8");
-	if (!req.app.locals.isCourseFileValid(JSON.parse(course))) return res.status(401).json({ message: "Invalid course file. Please provide a valid course." });
+	if (!req.app.locals.isCourseFileValid(JSON.parse(course))) return res.status(401).json({ res: res.statusCode, message: "Invalid course file. Please provide a valid course." });
 
 	let code = generateCode(req.app.locals);
 	let file = `public/courses/${code}.txt`;
@@ -123,9 +123,9 @@ router.post("/upload", isUserGame, async (req, res) => {
 
 router.post("/update", isUserGame, async (req, res) => {
 	const headers = req.headers;
-	if (!headers.course) return res.status(401).json({ message: "No course provided. Please provide a valid course." });
-	if (!headers.map) return res.status(401).json({ message: "No map provided. Please provide a valid map." });
-	if (!headers.code) return res.status(401).json({ message: "No code provided. Please provide a valid course code." });
+	if (!headers.course) return res.status(401).json({ res: res.statusCode, message: "No course provided. Please provide a valid course." });
+	if (!headers.map) return res.status(401).json({ res: res.statusCode, message: "No map provided. Please provide a valid map." });
+	if (!headers.code) return res.status(401).json({ res: res.statusCode, message: "No code provided. Please provide a valid course code." });
 
 	const ip = req.headers["cf-connecting-ip"] || "Unknown";
 	const key = headers.authorization;
@@ -138,11 +138,11 @@ router.post("/update", isUserGame, async (req, res) => {
 
 	const courseData = await req.app.locals.db.getData(`/courses/${headers.code}`);
 
-	if (courseData.map !== headers.map) return res.status(401).json({ message: "Invalid map. You should provide the same map as before." });
-	if (courseData.uploader.userid !== steamIds[key]) return res.status(401).json({ message: "Invalid key. You are not the uploader of this course. Only the uploader can update their course." });
+	if (courseData.map !== headers.map) return res.status(401).json({ res: res.statusCode, message: "Invalid map. You should provide the same map as before." });
+	if (courseData.uploader.userid !== steamIds[key]) return res.status(401).json({ res: res.statusCode, message: "Invalid key. You are not the uploader of this course. Only the uploader can update their course." });
 
 	const course = Buffer.from(headers.course, "base64").toString("utf-8");
-	if (!req.app.locals.isCourseFileValid(JSON.parse(course))) return res.status(401).json({ message: "Invalid course file. Please provide a valid course." });
+	if (!req.app.locals.isCourseFileValid(JSON.parse(course))) return res.status(401).json({ res: res.statusCode, message: "Invalid course file. Please provide a valid course." });
 
 	fs.writeFileSync(`public/courses/${headers.code}.txt`, course, "utf-8");
 
@@ -173,7 +173,7 @@ router.post("/rate", isUser, async (req, res) => {
 		await req.app.locals.db.push("/ratings", ratings);
 
 		res.send({ success: true, code: code, dislikes: Object.values(ratings[code]).filter(x => x === false).length });
-	} else return res.status(401).json({ message: "Invalid action provided." });
+	} else return res.status(401).json({ res: res.statusCode, message: "Invalid action provided." });
 });
 
 router.post("/admin", isAdmin, async (req, res) => {
