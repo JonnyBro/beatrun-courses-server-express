@@ -58,7 +58,7 @@ router.get("/download", isUser, async (req, res) => {
 	const file = fs.readFileSync(`public/${courseData.path}`, "utf-8");
 
 	await req.app.locals.log(`[DOWNLOAD] Served a course for user (Course: ${headers.code}, SteamID: ${steamid}, Key ${key}).`);
-	res.send(file);
+	res.send({ res: res.statusCode, file: file });
 });
 
 router.post("/upload", isUser, async (req, res) => {
@@ -87,8 +87,6 @@ router.post("/upload", isUser, async (req, res) => {
 		file = `public/courses/${code}.txt`;
 	} while (fs.existsSync(file));
 
-	console.log(code);
-
 	fs.writeFileSync(file, course, "utf-8");
 
 	const mapImage = headers.mapid !== 0 ? await openGraphScraper({ url: `https://steamcommunity.com/sharedfiles/filedetails/?id=${headers.mapid}` }).then(data => data.result.ogImage[0].url) : 0;
@@ -108,7 +106,40 @@ router.post("/upload", isUser, async (req, res) => {
 	}, false);
 
 	await req.app.locals.log(`[UPLOAD] User uploaded a course (Course: ${code}, SteamID: ${steamIds[key]}, Key ${key}).`);
-	res.send(code);
+	res.send({ res: res.statusCode, code: code });
+});
+
+router.post("/update", isUser, async (req, res) => {
+	const headers = req.headers;
+	if (!headers.course) return res.status(401).json({ message: "No course provided. Please provide a valid course." });
+	if (!headers.map) return res.status(401).json({ message: "No map provided. Please provide a valid map." });
+	if (!headers.code) return res.status(401).json({ message: "No code provided. Please provide a valid course code." });
+
+	const ip = req.headers["cf-connecting-ip"] || "Unknown";
+	const key = headers.authorization;
+	const keys = await req.app.locals.db.getData("/keys");
+	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
+	const steamid = steamIds[key];
+
+	if (ip !== "Unknown" && (await req.app.locals.isRatelimited(ip))) return res.status(401).json({ message: "Too many requests. Please try again later." });
+	if (ip !== "Unknown" && (await req.app.locals.isMultiAccount(ip, steamid))) return res.status(401).json({ message: "Your account was detected as multiaccount. Please open a ticket on our Discord server." });
+
+	const courseData = await req.app.locals.db.getData(`/courses/${headers.code}`);
+
+	if (courseData.map !== headers.map) return res.status(401).json({ message: "Invalid map. You should provide the same map as before." });
+	if (courseData.uploader.userid !== steamIds[key]) return res.status(401).json({ message: "Invalid key. You are not the uploader of this course. Only the uploader can update their course." });
+
+	const course = Buffer.from(headers.course, "base64").toString("utf-8");
+	if (!req.app.locals.isCourseFileValid(JSON.parse(course))) return res.status(401).json({ message: "Invalid course file. Please provide a valid course." });
+
+	fs.writeFileSync(`public/courses/${headers.code}.txt`, course, "utf-8");
+
+	courseData.time = Date.now();
+
+	await req.app.locals.db.push(`/courses/${headers.code}`, courseData);
+
+	await req.app.locals.log(`[UPDATE] User updated a course (Course: ${headers.code}, SteamID: ${steamIds[key]}, Key ${key}).`);
+	res.send({ res: res.statusCode, code: headers.code });
 });
 
 router.post("/admin", isAdmin, async (req, res) => {
