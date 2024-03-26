@@ -36,6 +36,37 @@
 
 			window.location.href = `/?page=${page.value}&sort=${sort.value}&search=${search.value}`;
 		}
+		<% if (user) { %>
+		function like(element) {
+			const id = element.getAttribute("id");
+			const likesElement = document.getElementById(`${id}-likes`);
+
+			const xhr = new XMLHttpRequest();
+			xhr.open("POST", "/api/rate", false);
+			xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+			xhr.onload = function () {
+				const response = JSON.parse(this.responseText);
+
+				if (response.success) likesElement.innerText = response.likes;
+			};
+			xhr.send(JSON.stringify({ action: "like", code: id, steamid: '<%- user.steamid %>' }));
+		}
+
+		function dislike(element) {
+			const id = element.getAttribute("id");
+			const dislikesElement = document.getElementById(`${id}-dislikes`);
+
+			const xhr = new XMLHttpRequest();
+			xhr.open("POST", "/api/rate", false);
+			xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+			xhr.onload = function () {
+				const response = JSON.parse(this.responseText);
+
+				if (response.success) dislikesElement.innerText = response.dislikes;
+			};
+			xhr.send(JSON.stringify({ action: "dislike", code: id, steamid: '<%- user.steamid %>' }));
+		}
+		<% } %>
 	</script>
 </head>
 

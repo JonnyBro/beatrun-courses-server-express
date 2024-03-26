@@ -17,6 +17,18 @@ async function isAdmin(req, res, next) {
 }
 
 async function isUser(req, res, next) {
+	if (!req.user || !req.app.locals.admins[req.user.steamid]) return res.redirect("/key");
+
+	const keys = await req.app.locals.db.getData("/keys");
+	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
+	const key = req.user.authKey;
+
+	if (!steamIds[key]) return res.status(401).json({ message: "Unauthorized." });
+
+	return next();
+}
+
+async function isUserGame(req, res, next) {
 	// if (req.get("user-agent") !== "Valve/Steam HTTP Client 1.0 GMod/13") return res.status(401).json({ message: "Not in-game" });
 
 	const keys = await req.app.locals.db.getData("/keys");
@@ -37,7 +49,7 @@ router.get("/", isUser, async (req, res) => {
 	res.send("Hello World!");
 });
 
-router.get("/download", isUser, async (req, res) => {
+router.get("/download", isUserGame, async (req, res) => {
 	const headers = req.headers;
 	if (!headers.code) return res.status(401).json({ message: "No code provided. Please provide a valid course code." });
 	if (!headers.map) return res.status(401).json({ message: "No map provided. Please provide a valid map." });
@@ -61,7 +73,7 @@ router.get("/download", isUser, async (req, res) => {
 	res.send({ res: res.statusCode, file: file });
 });
 
-router.post("/upload", isUser, async (req, res) => {
+router.post("/upload", isUserGame, async (req, res) => {
 	const headers = req.headers;
 	if (!headers.course) return res.status(401).json({ message: "No course provided. Please provide a valid course." });
 	if (!headers.map) return res.status(401).json({ message: "No map provided. Please provide a valid map." });
@@ -89,7 +101,7 @@ router.post("/upload", isUser, async (req, res) => {
 
 	fs.writeFileSync(file, course, "utf-8");
 
-	const mapImage = headers.mapid !== 0 ? await openGraphScraper({ url: `https://steamcommunity.com/sharedfiles/filedetails/?id=${headers.mapid}` }).then(data => data.result.ogImage[0].url) : 0;
+	const mapImage = headers.mapid !== "0" ? await openGraphScraper({ url: `https://steamcommunity.com/sharedfiles/filedetails/?id=${headers.mapid}` }).then(data => data.result.ogImage[0].url) : "";
 
 	await req.app.locals.db.push("/courses", {
 		[code]: {
@@ -109,7 +121,7 @@ router.post("/upload", isUser, async (req, res) => {
 	res.send({ res: res.statusCode, code: code });
 });
 
-router.post("/update", isUser, async (req, res) => {
+router.post("/update", isUserGame, async (req, res) => {
 	const headers = req.headers;
 	if (!headers.course) return res.status(401).json({ message: "No course provided. Please provide a valid course." });
 	if (!headers.map) return res.status(401).json({ message: "No map provided. Please provide a valid map." });
@@ -140,6 +152,28 @@ router.post("/update", isUser, async (req, res) => {
 
 	await req.app.locals.log(`[UPDATE] User updated a course (Course: ${headers.code}, SteamID: ${steamIds[key]}, Key ${key}).`);
 	res.send({ res: res.statusCode, code: headers.code });
+});
+
+router.post("/rate", isUser, async (req, res) => {
+	const { action, code, steamid } = req.body;
+
+	if (action === "like") {
+		const ratings = await req.app.locals.db.getData("/rating");
+
+		ratings[code][steamid] = true;
+
+		await req.app.locals.db.push("/ratings", ratings);
+
+		res.send({ success: true, code: code, likes: Object.values(ratings[code]).filter(x => x === true).length });
+	} else if (action === "dislike") {
+		const ratings = await req.app.locals.db.getData("/rating");
+
+		ratings[code][steamid] = false;
+
+		await req.app.locals.db.push("/ratings", ratings);
+
+		res.send({ success: true, code: code, dislikes: Object.values(ratings[code]).filter(x => x === false).length });
+	} else return res.status(401).json({ message: "Invalid action provided." });
 });
 
 router.post("/admin", isAdmin, async (req, res) => {

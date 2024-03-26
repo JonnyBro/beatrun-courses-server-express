@@ -69,17 +69,19 @@ router.get("/", async (req, res) => {
 		let codeMapImage = "img/unknown.jpg";
 
 		const codeMap = codeData.map;
-		if (codeMap === "gm_flatgrass" || codeMap === "gm_construct")
-			if (fs.existsSync(`public/img/${codeMap}.jpg`)) codeMapImage = `img/${codeMap}.jpg`;
+		if (codeMap === "gm_flatgrass" || codeMap === "gm_construct") if (fs.existsSync(`public/img/${codeMap}.jpg`)) codeMapImage = `img/${codeMap}.jpg`;
 
-		if (codeData.mapimg && codeData.mapimg.length > 0) codeMapImage = codeData.mapimg;
+		if (codeData.mapimg) codeMapImage = codeData.mapimg;
 
-		let codeMapId = "2818480138"; // le troll
-		if (codeData.mapid && codeData.mapid.length > 0 && codeData.mapid !== "0") codeMapId = codeData.mapid;
-
+		const codeMapId = (codeData.mapid !== "0" && codeData.mapid !== "") ? codeData.mapid : "2818480138"; // le troll
 		const codeUserId = codeData.uploader.userid;
 		const codeUsername = usernames[codeUserId] ? usernames[codeUserId] : codeUserId;
-		const rating = getCourseRating(ratings, code);
+
+		if (!ratings[code]) {
+			ratings[code] = {};
+		}
+
+		const rating = getCourseRating(ratings[code]);
 
 		codesData.push({
 			name: parsedCodeFile[4],
@@ -153,27 +155,21 @@ router.get("/", async (req, res) => {
 		coursesList: sortedCards,
 		searchText: search,
 	});
+
+	await req.app.locals.db.push("/rating", ratings);
 });
 
-/**
- * Gets the rating data for a course based on its code.
- *
- * @param {Object} data Object containing rating data mapped by course code
- * @param {String} code Course code to get rating data for
- * @returns {Object} Object containing rating data
- */
-function getCourseRating(data, code) {
-	if (!data[code]) return { likes: 0, dislikes: 0, ratings: 0, rateSmart: 0, rateDumb: 0 };
+function getCourseRating(data) {
+	const ratings = Object.keys(data).length;
 
-	const ratings = Object.keys(data[code]).length;
+	if (ratings <= 0) return { likes: 0, dislikes: 0, ratings: 0, rateSmart: 0, rateDumb: 0 };
+
 	let likes = 0,
 		dislikes = 0,
 		rateSmart = 0,
 		rateDumb = 0;
 
-	if (ratings <= 0) return { likes: 0, dislikes: 0, ratings: 0, rateSmart: 0, rateDumb: 0 };
-
-	for (const r in data[code]) if (data[code][r]) likes += 1;
+	for (const r in data) if (data[r]) likes += 1;
 
 	dislikes = ratings - likes;
 	rateSmart = ratings + likes - dislikes;

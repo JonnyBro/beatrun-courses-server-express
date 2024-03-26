@@ -32,7 +32,7 @@
 				<div class="flex flex-col justify-center">
 					<div class="truncate w-3/4" style="overflow:hidden;">
 						<i class="fa-solid fa-user w-4"></i>
-						<a title="Click to see SteamID/Name" id="u_{coursecode}" href="#" onclick="event.preventDefault(); this.innerText === '{uploadername}' ? this.innerText = '{uploaderuid}' : this.innerText = '{uploadername}'">{uploadername}</a>
+						<a title="Click to see SteamID/Name" href="#" onclick="event.preventDefault(); this.innerText === '{uploadername}' ? this.innerText = '{uploaderuid}' : this.innerText = '{uploadername}'">{uploadername}</a>
 					</div>
 				</div>
 				<div class="flex flex-col justify-center">
@@ -41,12 +41,12 @@
 						<span>{fdate}</span>
 					</div>
 				</div>
-				<div id="r{coursecode}rate" class="text-center absolute bottom-0 right-0">
-					<span class="font-bold">{likecount}</span>
-					<a title="Like" href="#" hx-post="/rate?code={coursecode}&action=like"> <i class="hover:text-yellow-200 transition-all fa-solid fa-thumbs-up"></i></a>
+				<div id="rating" class="text-center absolute bottom-0 right-0">
+					<span id="{coursecode}-likes" class="font-bold">{likecount}</span>
+					<a title="Like" href="#" id="{coursecode}" onclick="event.preventDefault(); like(this)"><i class="hover:text-yellow-200 transition-all fa-solid fa-thumbs-up"></i></a>
 					/
-					<span class="font-bold">{dislikecount}</span>
-					<a title="Dislike" href="#" hx-post="/rate?code={coursecode}&action=dislike"><i class="hover:text-yellow-200 transition-all fa-solid fa-thumbs-down"></i></a>
+					<span id="{coursecode}-dislikes" class="font-bold">{dislikecount}</span>
+					<a title="Dislike" href="#" id="{coursecode}" onclick="event.preventDefault(); dislike(this)"><i class="hover:text-yellow-200 transition-all fa-solid fa-thumbs-down"></i></a>
 				</div>
 				<div class="absolute -top-1 right-0 hover:text-yellow-200 transition-all">
 					<a title="Download course file" href="{coursedownload}" download><i class="fa-solid fa-download"></i></a>
