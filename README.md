@@ -10,3 +10,10 @@ This is project is a rewrite of the [original](https://github.com/JonnyBro/beatr
 2. `pnpm install`
 3. `pnpm build`
 4. `pnpm start`
+
+## TODO
+
+* [ ] Rewrite admin page.
+* [ ] Make admin page look better.
+* [ ] Refactor some stupid code that I will find.
+* [ ] Add something else? (speedruns uploads leak??)
