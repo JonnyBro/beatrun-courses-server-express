@@ -1,9 +1,10 @@
 {
-    "admins": {},
-    "keys": {},
-    "courses": {},
-    "locked": {},
-    "rating": {},
-    "record": {},
-    "usernames": {}
+	"admins": {},
+	"keys": {},
+	"courses": {},
+	"locked": {},
+	"rating": {},
+	"records": {},
+	"usernames": {},
+	"ratelimits": {}
 }

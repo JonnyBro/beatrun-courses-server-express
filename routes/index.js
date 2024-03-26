@@ -64,7 +64,7 @@ router.get("/", async (req, res) => {
 
 		const parsedCodeFile = JSON.parse(codeFile);
 
-		if (!isCourseFileValid(parsedCodeFile)) console.log("course is not valid: " + code);
+		if (!req.app.locals.isCourseFileValid(parsedCodeFile)) console.log("course is not valid: " + code);
 
 		let codeMapImage = "img/unknown.jpg";
 
@@ -154,19 +154,6 @@ router.get("/", async (req, res) => {
 		searchText: search,
 	});
 });
-
-/**
- * Validates that a course file content array is valid.
- *
- * @param {any[]} content The course file content array to validate
- * @returns {Boolean} True if the content is a valid course file array
- */
-function isCourseFileValid(content) {
-	if (content.length !== 6) return false;
-	if (typeof content[0] !== "object" || typeof content[1] !== "object" || typeof content[2] !== "string" || typeof content[3] !== "number" || typeof content[4] !== "string" || typeof content[5] !== "object") return false;
-
-	return true;
-}
 
 /**
  * Gets the rating data for a course based on its code.

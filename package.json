@@ -13,6 +13,7 @@
 		"morgan": "^1.9.1",
 		"node-fetch": "^2.7.0",
 		"node-json-db": "^2.3.0",
+		"open-graph-scraper": "^6.5.0",
 		"passport": "^0.7.0",
 		"passport-steam": "^1.0.18"
 	},

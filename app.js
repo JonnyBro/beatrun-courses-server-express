@@ -101,6 +101,10 @@ app.locals = {
 	log: log,
 	sanitize: sanitize,
 	getKey: getKey,
+	isRatelimited: isRatelimited,
+	isMultiAccount: isMultiAccount,
+	isCourseFileValid: isCourseFileValid,
+	generateRandomString: generateRandomString,
 };
 
 /**
@@ -141,6 +145,74 @@ async function _createKey(user) {
 
 		return key;
 	} else return await _createKey(user);
+}
+
+/**
+ * Validates that a course file content array is valid.
+ *
+ * @param {any[]} content The course file content array to validate
+ * @returns {Boolean} True if the content is a valid course file array
+ */
+function isCourseFileValid(content) {
+	if (content.length !== 6) return false;
+	if (typeof content[0] !== "object" || typeof content[1] !== "object" || typeof content[2] !== "string" || typeof content[3] !== "number" || typeof content[4] !== "string" || typeof content[5] !== "object") return false;
+
+	return true;
+}
+
+/**
+ * Checks if an IP address is currently rate limited.
+ *
+ * Gets the current rate limits from the database.
+ * If the IP already has a recent rate limit, returns true.
+ * Otherwise, saves a new rate limit for the IP and returns false.
+ *
+ * @param {Object} db Database instance
+ * @param {string} ip The IP address to check
+ * @returns {Promise<boolean>} Whether the IP is currently rate limited
+ */
+async function isRatelimited(ip) {
+	const rateLimits = await db.getData("/ratelimits");
+
+	if (rateLimits[ip] && Date.now() - rateLimits[ip] <= config.rateLimitTime) return true;
+
+	rateLimits[ip] = Date.now();
+
+	await db.push("/ratelimits", rateLimits);
+
+	return false;
+}
+
+async function isMultiAccount(ip, steamid) {
+	const locked = await db.getData("/locked");
+	const records = await db.getData("/records");
+
+	if (locked[steamid]) return true;
+
+	if (!records[steamid]) records[steamid] = {
+		"ips": {
+			[ip]: true,
+		},
+		"lastchanged": Date.now(),
+	};
+
+	// Clear IPs if the user has changed their ip more than ipChangeTime
+	if (Date.now() - records[steamid]["lastchanged"] > config.ipChangeTime) {
+		records[steamid]["ips"] = [];
+		records[steamid]["lastchanged"] = Date.now();
+	}
+
+	// Lock account if the user changed their IP more than 3 time in ipChangeTime
+	if (Object.keys(records[steamid]["ips"]).length > 2) {
+		locked[steamid] = true;
+
+		await db.push("/locked", locked);
+		return true;
+	}
+
+	await db.push("/records", records);
+
+	return false;
 }
 
 /**
