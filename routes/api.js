@@ -160,7 +160,7 @@ router.post("/rate", isUser, async (req, res) => {
 
 		ratings[code][steamid] = true;
 
-		await req.app.locals.db.push("/ratings", ratings);
+		await req.app.locals.db.push("/rating", ratings);
 
 		res.send({ success: true, code: code, likes: Object.values(ratings[code]).filter(x => x === true).length });
 	} else if (action === "dislike") {
@@ -168,7 +168,7 @@ router.post("/rate", isUser, async (req, res) => {
 
 		ratings[code][steamid] = false;
 
-		await req.app.locals.db.push("/ratings", ratings);
+		await req.app.locals.db.push("/rating", ratings);
 
 		res.send({ success: true, code: code, dislikes: Object.values(ratings[code]).filter(x => x === false).length });
 	} else return res.status(401).json({ res: res.statusCode, message: "Invalid action provided." });
