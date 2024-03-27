@@ -6,12 +6,10 @@ const express = require("express"),
 async function isAdmin(req, res, next) {
 	if (!req.user || !req.app.locals.admins[req.user.steamid]) return res.redirect("/key");
 
-	const keys = await req.app.locals.db.getData("/keys");
-	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
 	const admins = req.app.locals.admins;
-	const key = req.user.authKey;
+	const steamid = req.user.steamid;
 
-	if (!admins[steamIds[key]]) return res.status(401).json({ res: res.statusCode, message: "Unauthorized." });
+	if (!admins[steamid]) return res.status(401).json({ res: res.statusCode, message: "Unauthorized." });
 
 	return next();
 }
