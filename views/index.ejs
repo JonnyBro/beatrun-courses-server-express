@@ -36,6 +36,7 @@
 
 			window.location.href = `/?page=${page.value}&sort=${sort.value}&search=${search.value}`;
 		}
+
 		<% if (user) { %>
 		function like(element) {
 			const id = element.getAttribute("id");
@@ -44,12 +45,16 @@
 			const xhr = new XMLHttpRequest();
 			xhr.open("POST", "/api/rate", false);
 			xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-			xhr.onload = function () {
+			xhr.onload = function() {
 				const response = JSON.parse(this.responseText);
 
 				if (response.success) likesElement.innerText = response.likes;
 			};
-			xhr.send(JSON.stringify({ action: "like", code: id, steamid: '<%- user.steamid %>' }));
+			xhr.send(JSON.stringify({
+				action: "like",
+				code: id,
+				steamid: '<%- user.steamid %>'
+			}));
 		}
 
 		function dislike(element) {
@@ -59,12 +64,16 @@
 			const xhr = new XMLHttpRequest();
 			xhr.open("POST", "/api/rate", false);
 			xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-			xhr.onload = function () {
+			xhr.onload = function() {
 				const response = JSON.parse(this.responseText);
 
 				if (response.success) dislikesElement.innerText = response.dislikes;
 			};
-			xhr.send(JSON.stringify({ action: "dislike", code: id, steamid: '<%- user.steamid %>' }));
+			xhr.send(JSON.stringify({
+				action: "dislike",
+				code: id,
+				steamid: '<%- user.steamid %>'
+			}));
 		}
 		<% } %>
 	</script>
@@ -99,8 +108,8 @@
 			<% if (user && admins[user.steamid]) { %>
 				<div class="flex flex-col justify-center">
 					<a href="/admin" class="text-base text-white p-2 rounded-lg
-										hover:text-yellow-200 transition-all h-fit bg-opacity-10
-										drop-shadow-[0_0px_6px_rgba(0,0,0,0.3)]">
+											hover:text-yellow-200 transition-all h-fit bg-opacity-10
+											drop-shadow-[0_0px_6px_rgba(0,0,0,0.3)]">
 						<i class="fa-solid fa-user-tie"></i>
 					</a>
 				</div>

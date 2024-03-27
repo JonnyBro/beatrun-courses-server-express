@@ -9,6 +9,26 @@
 
 	<link rel="stylesheet" type="text/css" href="css/style.css">
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+	<script>
+		function sendAction(args) {
+			const { action } = args;
+			const likesElement = document.getElementById(`${id}-likes`);
+
+			const xhr = new XMLHttpRequest();
+			xhr.open("POST", "/api/admin", false);
+			xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+			xhr.onload = function() {
+				const response = JSON.parse(this.responseText);
+
+				if (response.success) likesElement.innerText = response.likes;
+			};
+			xhr.send(JSON.stringify({
+				action: action,
+				args: args
+			}));
+		}
+	</script>
 </head>
 
 <body class="w-screen h-screen bg-stone-900 overflow-x-hidden">
@@ -56,38 +76,37 @@
 			</div>
 
 			<div>
-				<form method="post">
-					<div class="flex">
-						<input type="text" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" name="_bcs_addkey_target" placeholder="SteamID64">
-						<input type="submit" name="_bcs_addkey" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Add Key" />
-					</div>
-					<br>
-					<div class="flex">
-						<input type="text" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" name="_bcs_rmkey_target" style="width: auto" placeholder="SteamID64">
-						<input type="submit" name="_bcs_rmkey" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" role="button" value="Remove Key" />
-					</div>
-					<br>
-					<div class="flex">
-						<input type="text" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" name="_bcs_lock_target" style="width: auto" placeholder="Authkey/SteamID64/IP">
-						<input type="submit" name="_bcs_lock" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Lock" />
-					</div>
-					<br>
-					<div class="flex">
-						<input type="text" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" name="_bcs_unlock_target" style="width: auto" placeholder="Authkey/SteamID64/IP">
-						<input type="submit" name="_bcs_unlock" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" style="width: auto" role="button" value="Unlock" />
-					</div>
-					<br>
-					<div class="flex">
-						<input type="text" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" name="_bcs_rm_course_code" style="width: auto" placeholder="Course Code">
-						<input type="submit" name="_bcs_rm_course" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" style="width: auto" role="button" value="Remove Course" />
-					</div>
-					<br>
-					<div class="flex">
-						<input type="submit" name="_bcs_logs" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Show logs" />
-						<input type="submit" name="_bcs_records" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Show records" />
-						<input type="submit" name="_bcs_bans" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Show locks" />
-					</div>
-				</form>
+				<div class="flex">
+					<input type="text" id="addKey" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" placeholder="SteamID64">
+					<input type="submit" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Add Key" />
+				</div>
+				<br>
+				<div class="flex">
+					<input type="text" id="removeKey" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" placeholder="SteamID64">
+					<input type="submit" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" role="button" value="Remove Key" />
+				</div>
+				<br>
+				<div class="flex">
+					<input type="text" id="lockUser" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" placeholder="Authkey/SteamID64/IP">
+					<input type="submit" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Lock" />
+				</div>
+				<br>
+				<div class="flex">
+					<input type="text" id="unlockUser" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" placeholder="Authkey/SteamID64/IP">
+					<input type="submit" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" style="width: auto" role="button" value="Unlock" />
+				</div>
+				<br>
+				<div class="flex">
+					<input type="text" id="removeCourse" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" placeholder="Course Code">
+					<input type="submit" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" style="width: auto" role="button" value="Remove Course" />
+				</div>
+				<br>
+				<div class="flex">
+					<input type="submit" id="showLogs" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Show logs" />
+					<input type="submit" id="showRecords" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Show records" />
+					<input type="submit" id="showLocks" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Show locks" />
+				</div>
+				<br>
 				<br>
 				Server response:<br>
 				<code><%- response %></code>

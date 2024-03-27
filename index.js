@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const app = require("./app"),
 	http = require("http"),
 	config = require("./config");
