@@ -115,15 +115,17 @@ app.locals = {
  * Checks if the user already has a key, and returns it if so.
  * Otherwise generates a new one.
  *
- * @param {Object} user The user object.
+ * @param {Object | string} user The user object or SteamID64.
  * @returns {Promise<String>} The user's key.
  */
 async function getKey(user) {
+	user = typeof user === "string" ? user : user.steamid;
+
 	const keys = await db.getData("/keys");
-	const key = keys[user.steamid];
+	const key = keys[user];
 
 	if (key) {
-		await log(`[KEY] User logged in (SteamID: ${user.steamid}, Key ${key}).`);
+		await log(`[KEY] User logged in (SteamID: ${user}, Key ${key}).`);
 		return key;
 	} else return await _createKey(user);
 }
@@ -131,18 +133,20 @@ async function getKey(user) {
 /**
  * Creates a new unique key for the given user and saves it to the database.
  *
- * @param {Object} user The OpenID Steam user object.
+ * @param {Object | string} user The OpenID Steam user object or SteamID64.
  * @returns {Promise<String>} The new unique key generated for the user.
  */
 async function _createKey(user) {
+	user = typeof user === "string" ? user : user.steamid;
+
 	const keys = await db.getData("/keys");
 	const key = generateRandomString();
 	const isFound = keys[key];
 
 	if (!isFound) {
-		keys[user.steamid] = key;
+		keys[user] = key;
 
-		await app.locals.log(`[KEY] New user (SteamID: ${user.steamid}, TimeCreated: ${user.timecreated}, Key: ${key}).`);
+		await app.locals.log(`[KEY] New user (SteamID: ${user}, TimeCreated: ${typeof user === "string" ? "Unknown" : user.timecreated}, Key: ${key}).`);
 		await db.push("/keys", keys);
 
 		return key;

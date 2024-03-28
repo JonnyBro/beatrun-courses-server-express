@@ -175,25 +175,72 @@ router.post("/rate", isUser, async (req, res) => {
 });
 
 router.post("/admin", isAdmin, async (req, res) => {
-	const { args } = req.body;
+	const { action, target } = req.body.args;
 
-	if (args.action === "like") {
-		const ratings = await req.app.locals.db.getData("/rating");
+	if (action === "addKey") {
+		const key = await req.app.locals.getKey(target);
 
-		ratings[code][steamid] = true;
+		if (!key) return res.send({ success: false, message: "Internal error. Contact the developer." });
 
-		await req.app.locals.db.push("/rating", ratings);
+		res.send({ success: true, message: `Key added successfully.\n${key}` });
+	} else if (action === "removeKey") {
+		const keys = await req.app.locals.db.getData("/keys");
 
-		res.send({ success: true, code: code, likes: Object.values(ratings[code]).filter(x => x === true).length });
-	} else if (args.action === "dislike") {
-		const ratings = await req.app.locals.db.getData("/rating");
+		if (!keys[target.toUpperCase()]) return res.send({ success: false, message: "Invalid key provided." });
 
-		ratings[code][steamid] = false;
+		delete keys[target.toUpperCase()];
 
-		await req.app.locals.db.push("/rating", ratings);
+		await req.app.locals.db.push("/keys", keys);
 
-		res.send({ success: true, code: code, dislikes: Object.values(ratings[code]).filter(x => x === false).length });
-	} else return res.status(401).json({ res: res.statusCode, message: "Invalid action provided." });
+		res.send({ success: true, message: `Key removed successfully.\n${target.toUpperCase()}` });
+	} else if (action === "lockUser") {
+		const locked = await req.app.locals.db.getData("/locked");
+
+		if (locked[target]) return res.send({ success: false, message: "User is already locked." });
+
+		locked[target] = true;
+
+		await req.app.locals.db.push("/locked", locked);
+
+		res.send({ success: true, message: `User is now locked.\n${target}` });
+	} else if (action === "unlockUser") {
+		const locked = await req.app.locals.db.getData("/locked");
+
+		if (!locked[target]) return res.send({ success: false, message: "User is not locked." });
+
+		delete locked[target];
+
+		await req.app.locals.db.push("/locked", locked);
+
+		res.send({ success: true, message: `User is now unlocked.\n${target}` });
+	} else if (action === "removeCourse") {
+		const courses = await req.app.locals.db.getData("/courses");
+
+		if (!courses[target.toUpperCase()]) return res.send({ success: false, message: "Invalid course code provided." });
+
+		delete courses[target.toUpperCase()];
+		fs.unlinkSync(`public/courses/${target.toUpperCase()}.txt`);
+
+		await req.app.locals.db.push("/courses", courses);
+
+		res.send({ success: true, message: `Course removed successfully.\n${target.toUpperCase()}` });
+	} else if (action === "showLogs") {
+		const file = fs.readFileSync("data/logs.log", "utf-8");
+
+		if (!file) return res.send({ success: false, message: "No logs found." });
+
+		res.send({ success: true, message: file });
+	} else if (action === "showRecords") {
+		const records = await req.app.locals.db.getData("/records");
+
+		res.send({ success: true, message: JSON.stringify(records) });
+	} else if (action === "showLocks") {
+		const locked = await req.app.locals.db.getData("/locked");
+
+		const message = Object.keys(locked).length === 0 ? JSON.stringify(locked) : Object.keys(locked).map(x => `${x} - ${locked[x]}`).join("\n");
+
+		res.send({ success: true, message: message });
+	} else return res.send({ success: false, message: "Invalid action provided." });
 });
 
 router.get("/admin", isAdmin, async (req, res) => {
