@@ -98,7 +98,7 @@ router.get("/", async (req, res) => {
 			scoredumb: rating.rateDumb,
 			mapimg: codeMapImage,
 			mapwid: codeMapId,
-			time: codeData.time * 1000,
+			time: codeData.time,
 		});
 	});
 
