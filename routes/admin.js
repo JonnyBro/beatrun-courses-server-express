@@ -12,13 +12,10 @@ async function isAdmin(req, res, next) {
 	return next();
 }
 
-const response = "xd";
-
 router.get("/", isAdmin, async (req, res) => {
 	res.render("admin", {
 		user: req.user,
 		locals: req.app.locals,
-		response: response,
 	});
 });
 

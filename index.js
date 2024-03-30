@@ -19,7 +19,8 @@ if (!fs.existsSync("data/")) fs.mkdirSync("data/");
 const indexRouter = require("./routes/index"),
 	keyRouter = require("./routes/key"),
 	adminRouter = require("./routes/admin"),
-	apiRouter = require("./routes/api");
+	{ router: apiRouter } = require("./routes/api"),
+	statsRouter = require("./routes/stats");
 
 const app = express();
 
@@ -70,6 +71,7 @@ app.use("/", indexRouter);
 app.use("/key", keyRouter);
 app.use("/admin", adminRouter);
 app.use("/api", apiRouter);
+app.use("/stats", statsRouter);
 app.get("/auth", passport.authenticate("steam"), () => {});
 app.get("/auth/return", passport.authenticate("steam", { failureRedirect: "/" }), (req, res) => res.redirect("/key"));
 app.get("/auth/logout", (req, res, next) => {

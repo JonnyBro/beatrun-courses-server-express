@@ -260,4 +260,4 @@ function generateCode(locals) {
 	return code.toUpperCase();
 }
 
-module.exports = router;
+module.exports = { router: router, isUser: isUser, isUserGame: isUserGame, isAdmin: isAdmin };
