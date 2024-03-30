@@ -1,0 +1,51 @@
+<nav class="navbar justify-between bg-base-300">
+	<a class="btn btn-ghost text-lg" href="/">
+		beatrun.ru | Courses Database
+	</a>
+
+	<!-- Menu for mobile -->
+	<div class="dropdown dropdown-end sm:hidden">
+		<button class="btn btn-ghost">
+			<i class="fa-solid fa-bars text-lg"></i>
+		</button>
+
+		<ul tabindex="0" class="dropdown-content menu z-[1] bg-base-200 p-6 rounded-box shadow w-56 gap-2">
+			<li>
+				<a target="_blank" href="https://beatrun.ru">
+					<i class="fa-solid fa-house"></i>
+					Main page
+				</a>
+			</li>
+			<li>
+				<a target="_blank" href="https://discord.com/invite/93Psubbgsg">
+					<i class="fa-brands fa-discord"></i>
+					Our Discord
+				</a>
+			</li>
+			<a class="btn btn-sm btn-primary hover:bg-red-700" href="/key">Get Key</a>
+			<% if (user && locals.admins[user.steamid]) { %>
+				<a class="btn btn-sm btn-primary hover:bg-red-700" href="/admin">Admin</a>
+			<% } %>
+		</ul>
+	</div>
+
+	<!-- Menu for desktop -->
+	<ul class="hidden menu sm:menu-horizontal gap-2">
+		<li>
+			<a target="_blank" href="https://beatrun.ru">
+				<i class="fa-solid fa-house"></i>
+				Main page
+			</a>
+		</li>
+		<li>
+			<a target="_blank" href="https://discord.com/invite/93Psubbgsg">
+				<i class="fa-brands fa-discord"></i>
+				Our Discord
+			</a>
+		</li>
+		<a class="btn btn-sm btn-primary hover:bg-red-700" href="/key">Register</a>
+		<% if (user && locals.admins[user.steamid]) { %>
+			<a class="btn btn-sm btn-primary hover:bg-red-700" href="/admin">Admin</a>
+		<% } %>
+	</ul>
+</nav>
