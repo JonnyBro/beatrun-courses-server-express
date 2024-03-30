@@ -1,7 +1,4 @@
 <!DOCTYPE html>
-<html>
-
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -38,7 +35,6 @@
 		}
 
 		<% if (user) { %>
-
 		function like(element) {
 			const id = element.getAttribute("id");
 			const likesElement = document.getElementById(`${id}-likes`);
@@ -87,52 +83,71 @@
 		<div class="hero-content text-center">
 			<div class="text-center align-top w-full">
 				<div class="text-5xl font-bold font-mono">User submitted courses</div>
-				<div class="text-lg font-mono"></div>
 
 				<% if (!user) { %>
-				<a class="hover:text-yellow-200 transition-all text-red-300" href="/key">Authorize with Steam</a> to load and upload these courses in-game!
+					<div class="text-lg font-mono">
+						<a class="link link-warning" href="/key">Authorize with Steam</a> to load and upload these courses in-game!
+					</div>
 				<% } else { %>
-				Welcome, <b class="hover:text-yellow-200 transition-all"><%- locals.sanitize(user.personaname, false, true) %></b>!
+					<div class="text-lg font-mono">
+						Welcome, <b class="hover:text-red-700"><%- locals.sanitize(user.personaname, false, true) %></b>!
+					</div>
 				<% } %>
 
-
 				<div class="flex">
-					<div class="p-2">
-						<div class="pb-1 text-sm opacity-50">Page:</div>
-						<select id="pageSelect" onchange="update();" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white">
+					<div class="m-1">
+						<div class="label">
+							<span class="label-text">Page</span>
+						</div>
+						<select class="select" id="pageSelect" onchange="update();">
 							<%- pagesDropdown %>
 						</select>
 					</div>
 
-					<div class="p-2">
-						<div class="pb-1 text-sm opacity-50">Sorting:</div>
-						<select id="sortValue" onchange="update();" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white">
+					<div class="m-1">
+						<div class="label">
+							<span class="label-text">Sorting</span>
+						</div>
+						<select class="select" id="sortValue" onchange="update();">
 							<%- sortDropdown %>
 						</select>
 					</div>
 
-					<div class="p-2">
-						<div class="pb-1 text-sm opacity-50">Search:</div>
-						<input onkeyup="if (event.key === 'Enter') update();" id="searchQuery" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white"></input>
-						<script>
-							document.getElementById('searchQuery').value = '<%= searchText %>'
-						</script>
-					</div>
-
-					<div class="p-2">
-						<div class="pb-1 text-sm opacity-0">what are you looking for?</div>
-						<button class="btn" onclick="update();">Search</button>
+					<div class="m-1">
+						<div class="label">
+							<span class="label-text">Search</span>
+						</div>
+						<input class="input w-full max-w-xs" id="searchQuery" type="text" placeholder="Type here" onkeyup="if (event.key === 'Enter') update();"/>
+						<script> document.getElementById('searchQuery').value = '<%= searchText %>' </script>
 					</div>
 				</div>
 
 				<div id="courses" class="grid xl:grid-cols-2">
 					<%- coursesList %>
 				</div>
+				<!-- <div class="overflow-x-auto">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Uploaded</th>
+								<th>Name</th>
+								<th>Map</th>
+								<th>Code</th>
+								<th>Author</th>
+								<th>Elements</th>
+								<th>Rating</th>
+							</tr>
+						</thead>
+						<tbody>
+							<%- //coursesList %>
+						</tbody>
+					</table>
+				</div> -->
 			</div>
 		</div>
 	</div>
 
-		<% include ../components/footer.html %>
+	<% include ../components/footer.html %>
 </body>
 
 </html>

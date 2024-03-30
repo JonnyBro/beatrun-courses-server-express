@@ -1,0 +1,33 @@
+<tr class="hover">
+	<th>{fdate}</th>
+	<th>{coursename}</th>
+	<th>
+		<div class="tooltip" data-tip="Click to open map page">
+			<a target="_blank" href="https://steamcommunity.com/sharedfiles/filedetails/?id={mapwid}">{coursemap}</a>
+		</div>
+	</th>
+	<th>
+		<div class="tooltip" data-tip="Click to copy">
+			<a href="#" onclick="event.preventDefault(); navigator.clipboard.writeText('{coursecode}'); this.innerText = 'Copied!'; setTimeout(() => { this.innerText = '{coursecode}' }, 1000);">{coursecode}</a>
+		</div>
+	</th>
+	<th>
+		<div class="tooltip" data-tip="Click to toggle SteamID">
+			<a href="#" onclick="event.preventDefault(); this.innerText === '{uploadername}' ? this.innerText = '{uploaderuid}' : this.innerText = '{uploadername}'">{uploadername}</a>
+		</div>
+	</th>
+	<th>{elementcount}</th>
+	<th>
+		<div id="rating">
+			<span id="{coursecode}-likes" class="font-bold">{likecount}</span>
+			<div class="tooltip tooltip-left" data-tip="Like">
+				<a class="hover:text-green-500" href="#" id="{coursecode}" onclick="event.preventDefault(); like(this)"><i class="fa-solid fa-thumbs-up"></i></a>
+			</div>
+			/
+			<span id="{coursecode}-dislikes" class="font-bold">{dislikecount}</span>
+			<div class="tooltip tooltip-left" data-tip="Dislike">
+				<a class="hover:text-red-600" href="#" id="{coursecode}" onclick="event.preventDefault(); dislike(this)"><i class="fa-solid fa-thumbs-down"></i></a>
+			</div>
+		</div>
+	</th>
+</tr>
