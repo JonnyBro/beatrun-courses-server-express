@@ -99,7 +99,7 @@ router.post("/upload", isUserGame, async (req, res) => {
 
 	fs.writeFileSync(file, course, "utf-8");
 
-	const mapImage = headers.mapid !== "0" ? await openGraphScraper({ url: `https://steamcommunity.com/sharedfiles/filedetails/?id=${headers.mapid}` }).then(data => data.result.ogImage[0].url) : "";
+	const mapImage = headers.mapid === "0" || headers.mapid === "no_map_id" ? "" : await openGraphScraper({ url: `https://steamcommunity.com/sharedfiles/filedetails/?id=${headers.mapid}` }).then(data => data.result.ogImage[0].url);
 
 	await req.app.locals.db.push("/courses", {
 		[code]: {
@@ -110,7 +110,7 @@ router.post("/upload", isUserGame, async (req, res) => {
 			},
 			time: Date.now(),
 			path: `courses/${code}.txt`,
-			mapid: headers.mapid,
+			mapid: headers.mapid === "0" || headers.mapid === "no_map_id" ? "" : headers.mapid,
 			mapimg: mapImage,
 		},
 	}, false);
