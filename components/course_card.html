@@ -1,4 +1,4 @@
-<div class="card card-side w-fit bg-base-300 shadow-xl m-1">
+<div class="card card-side w-fit bg-red-700 shadow-xl m-1">
 	<figure>
 		<div class="relative">
 			<img src="{mapimagesrc}" style="height: 10.5rem; width: 12rem" class="object-fill">
@@ -15,13 +15,17 @@
 	<div class="card-body w-96 font-mono p-2">
 		<h2 class="card-title">{coursename}</h2>
 		<p>
-			<div class="tooltip text-left" data-tip="Click to copy">
-				<i class="fa-solid fa-file w-4"></i>
-				<a title="Click to copy" onclick="event.preventDefault(); navigator.clipboard.writeText('{coursecode}'); const text = this.innerText; this.innerText = 'Copied!'; setTimeout(() => { this.innerText = text }, 1000);" class="hover:text-yellow-200 transition-all" href="#">{coursecode}</a>
+			<div class="text-left">
+				<div class="tooltip" data-tip="Click to copy">
+					<i class="fa-solid fa-file w-4"></i>
+					<a class="hover:text-yellow-400" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText('{coursecode}'); const text = this.innerText; this.innerText = 'Copied!'; setTimeout(() => { this.innerText = text }, 1000);">{coursecode}</a>
+				</div>
 			</div>
-			<div class="tooltip text-left" data-tip="Click to toggle SteamID">
-				<i class="fa-solid fa-user w-4"></i>
-				<a href="#" onclick="event.preventDefault(); this.innerText === '{uploadername}' ? this.innerText = '{uploaderuid}' : this.innerText = '{uploadername}'">{uploadername}</a>
+			<div class="text-left">
+				<div class="tooltip" data-tip="Click to toggle SteamID">
+					<i class="fa-solid fa-user w-4"></i>
+					<a class="hover:text-yellow-400" href="#" onclick="event.preventDefault(); this.innerText === '{uploadername}' ? this.innerText = '{uploaderuid}' : this.innerText = '{uploadername}'">{uploadername}</a>
+				</div>
 			</div>
 			<div class="text-left">
 				<i class="fa-solid fa-upload w-4"></i>
@@ -32,13 +36,13 @@
 		<div class="card-actions justify-end">
 			<div class="absolute bottom-0 right-0">
 				<div class="tooltip" data-tip="Like">
-					<button class="btn btn-md btn-square btn-ghost hover:bg-green-500 hover:text-black">
+					<button class="btn btn-md btn-square btn-ghost">
 						<a href="#" id="{coursecode}" onclick="event.preventDefault(); like(this)"><i class="fa-solid fa-thumbs-up"></i></a>
 						<span class="badge badge-ghost" id="{coursecode}-likes">{likecount}</span>
 					</button>
 				</div>
 				<div class="tooltip" data-tip="Dislike">
-					<button class="btn btn-md btn-square btn-ghost hover:bg-red-600">
+					<button class="btn btn-md btn-square btn-ghost">
 						<a href="#" id="{coursecode}" onclick="event.preventDefault(); dislike(this)"><i class="fa-solid fa-thumbs-down"></i></a>
 						<span class="badge badge-ghost" id="{coursecode}-dislikes">{dislikecount}</span>
 					</button>
@@ -47,6 +51,9 @@
 		</div>
 
 		<div class="absolute top-0 right-0">
+			<button class="btn btn-ghost tooltip tooltip-left hover:text-yellow-400" data-tip="Open course info">
+				<a href="/stats/{coursecode}"><i class="fa-solid fa-info"></i></a>
+			</button>
 			<button class="btn btn-ghost tooltip tooltip-left hover:text-yellow-400" data-tip="Download">
 				<a href="{coursedownload}" download><i class="fa-solid fa-download"></i></a>
 			</button>
