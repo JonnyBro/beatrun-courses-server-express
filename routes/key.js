@@ -19,7 +19,9 @@ router.get("/", async (req, res) => {
  * @returns {Promise<boolean>} Promise resolving to true if user owns the game, false otherwise
  */
 async function hasGame(locals, user) {
-	if ((await fetch(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${locals.config.steamKey}&steamid=${user.steamid}&format=json`).then(r => r.json())).response.games.find(g => g.appid === 4000)) return true;
+	const response = (await fetch(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${locals.config.steamKey}&steamid=${user.steamid}&format=json`).then(r => r.json())).response;
+
+	if (response.games && response.games.find(g => g.appid === 4000)) return true;
 	return false;
 }
 

@@ -10,6 +10,7 @@
 		"ejs": "^2.6.1",
 		"express": "^4.16.1",
 		"express-session": "^1.18.0",
+		"lzma": "^2.3.2",
 		"morgan": "^1.9.1",
 		"node-fetch": "^2.7.0",
 		"node-json-db": "^2.3.0",
