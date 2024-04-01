@@ -2,7 +2,6 @@ const express = require("express"),
 	router = express.Router(),
 	fs = require("fs");
 
-
 router.get("/", async (req, res) => {
 	const courses = await req.app.locals.db.getData("/courses");
 	const codes = Object.keys(courses);
@@ -158,6 +157,18 @@ router.get("/", async (req, res) => {
 	await req.app.locals.db.push("/rating", ratings);
 });
 
+/**
+ * Calculates rating statistics for a course based on rating data.
+ *
+ * @param {Object} data - Object containing rating data where keys are user IDs
+ *                        and values are true for like or false for dislike
+ * @returns {Object} Object containing calculated rating stats:
+ *                  - likes: Number of likes
+ *                  - dislikes: Number of dislikes
+ *                  - ratings: Total number of ratings
+ *                  - rateSmart: Likes minus dislikes
+ *                  - rateDumb: Likes divided by total ratings
+ */
 function getCourseRating(data) {
 	const ratings = Object.keys(data).length;
 

@@ -1,7 +1,8 @@
 const express = require("express"),
 	router = express.Router(),
 	fs = require("fs"),
-	openGraphScraper = require("open-graph-scraper");
+	openGraphScraper = require("open-graph-scraper"),
+	lzma = require("lzma");
 
 async function isAdmin(req, res, next) {
 	if (!req.user || !req.app.locals.admins[req.user.steamid]) return res.redirect("/key");
@@ -86,7 +87,13 @@ router.post("/upload", isUserGame, async (req, res) => {
 	if (ip !== "Unknown" && (await req.app.locals.isRatelimited(ip))) return res.status(401).json({ res: res.statusCode, message: "Too many requests. Please try again later." });
 	if (ip !== "Unknown" && (await req.app.locals.isMultiAccount(ip, steamid))) return res.status(401).json({ res: res.statusCode, message: "Your account was detected as multiaccount. Please open a ticket on our Discord server." });
 
-	const course = Buffer.from(headers.course, "base64").toString("utf-8");
+	let course = "";
+	try {
+		course = lzma.decompress(Buffer.from(headers.course, "base64"));
+	} catch (e) {
+		course = Buffer.from(headers.course, "base64").toString("utf-8");
+	}
+
 	if (!req.app.locals.isCourseFileValid(JSON.parse(course))) return res.status(401).json({ res: res.statusCode, message: "Invalid course file. Please provide a valid course." });
 
 	let code = generateCode(req.app.locals);
@@ -139,7 +146,13 @@ router.post("/update", isUserGame, async (req, res) => {
 	if (courseData.map !== headers.map) return res.status(401).json({ res: res.statusCode, message: "Invalid map. You should provide the same map as before." });
 	if (courseData.uploader.userid !== steamIds[key]) return res.status(401).json({ res: res.statusCode, message: "Invalid key. You are not the uploader of this course. Only the uploader can update their course." });
 
-	const course = Buffer.from(headers.course, "base64").toString("utf-8");
+	let course = "";
+	try {
+		course = lzma.decompress(Buffer.from(headers.course, "base64"));
+	} catch (e) {
+		course = Buffer.from(headers.course, "base64").toString("utf-8");
+	}
+
 	if (!req.app.locals.isCourseFileValid(JSON.parse(course))) return res.status(401).json({ res: res.statusCode, message: "Invalid course file. Please provide a valid course." });
 
 	fs.writeFileSync(`public/courses/${headers.code}.txt`, course, "utf-8");
