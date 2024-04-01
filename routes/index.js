@@ -2,8 +2,6 @@ const express = require("express"),
 	router = express.Router(),
 	fs = require("fs");
 
-const courseCardComponent = fs.readFileSync("components/course_card.html", "utf-8");
-
 router.get("/", async (req, res) => {
 	const courses = await req.app.locals.db.getData("/courses");
 	const codes = Object.keys(courses);
@@ -197,6 +195,8 @@ function getCourseRating(data) {
  * @returns {String} The generated HTML string for the course card
  */
 function generateCourseCard(course) {
+	const courseCardComponent = fs.readFileSync("components/course_card.html", "utf-8");
+
 	const templates = {
 		"{coursename}": course.name,
 		"{coursecode}": course.code,
@@ -211,7 +211,7 @@ function generateCourseCard(course) {
 		"{time}": course.time,
 		"{mapimagesrc}": course.mapimg,
 		"{mapwid}": course.mapwid,
-		"{elementcount}": course.elements + " elements",
+		"{elementcount}": `${course.elements} ${course.elements > 1 ? "elements" : "element"}`,
 		"{fdate}": new Date(course.time).toLocaleString("ru-RU").split(", ")[0],
 	};
 

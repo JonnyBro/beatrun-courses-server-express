@@ -1,57 +1,63 @@
-<div data-date="{time}" data-rate-score-smart="{ratesmart}" data-rate-score-dumb="{ratedumb}" data-course-name="{coursename}" data-course-map="{coursemap}"
-	class="flex flex-row flex-shrink-0 m-2 p-2 w-fit
-			bg-red-700 rounded-lg
-			drop-shadow-[0_0px_10px_rgba(0,0,0,0.5)]">
-	<div class="flex w-52">
+<div class="card card-side w-fit bg-red-700 shadow-xl m-1">
+	<figure>
 		<div class="relative">
-			<img src="{mapimagesrc}" style="height: 7.25rem; width: 12.93rem" class="rounded-md object-cover">
-			<div class="absolute bottom-0 text-xl font-semibold
-						drop-shadow-[0_0px_2px_rgba(0,0,0,1)]">
-				<div class=" bg-black bg-opacity-30 pr-2 pl-1 py-0.5 pt-0 rounded-tr-md rounded-bl-md" style="max-width: 12rem; overflow: hidden;">
-					<a class="hover:text-yellow-200 transition-all" target="_blank" href="https://steamcommunity.com/sharedfiles/filedetails/?id={mapwid}">{coursemap}</a>
-				</div>
-			</div>
-			<div class="absolute top-0 text-sm font-semibold
-						drop-shadow-[0_0px_2px_rgba(0,0,0,1)]">
-				<div class="bg-black bg-opacity-30 p-1 rounded-br-md rounded-tl-md">
+			<img src="{mapimagesrc}" style="height: 10.5rem; width: 12rem" class="object-fill">
+
+			<div class="absolute bottom-0 text-left text-sm font-mono drop-shadow-[0_0px_2px_rgba(0,0,0,1)]">
+				<div class="bg-black bg-opacity-30 p-1">
+					<a class="link link-warning link-hover text-white" target="_blank" href="https://steamcommunity.com/sharedfiles/filedetails/?id={mapwid}">{coursemap}</a><br>
 					{elementcount}
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="flex w-96 ml-2">
-		<div class="relative w-full">
-			<div class="h-full w-full grid grid-rows-3 grid-cols-1">
-				<div class="flex flex-col justify-center text-lg font-bold w-11/12"><p class="truncate">{coursename}</p></div>
-				<div class="flex flex-col justify-center">
-					<div class="truncate w-3/4" style="overflow:hidden;">
-						<i class="fa-solid fa-file w-4"></i>
-						<a title="Click to copy" onclick="event.preventDefault(); navigator.clipboard.writeText('{coursecode}'); const text = this.innerText; this.innerText = 'Copied!'; setTimeout(() => { this.innerText = text }, 1000);" class="hover:text-yellow-200 transition-all" href="#">{coursecode}</a>
-					</div>
-				</div>
-				<div class="flex flex-col justify-center">
-					<div class="truncate w-3/4" style="overflow:hidden;">
-						<i class="fa-solid fa-user w-4"></i>
-						<a title="Click to see SteamID/Name" href="#" onclick="event.preventDefault(); this.innerText === '{uploadername}' ? this.innerText = '{uploaderuid}' : this.innerText = '{uploadername}'">{uploadername}</a>
-					</div>
-				</div>
-				<div class="flex flex-col justify-center">
-					<div class="truncate w-3/4" style="overflow:hidden;">
-						<i class="fa-solid fa-upload w-4"></i>
-						<span>{fdate}</span>
-					</div>
-				</div>
-				<div id="rating" class="text-center absolute bottom-0 right-0">
-					<span id="{coursecode}-likes" class="font-bold">{likecount}</span>
-					<a title="Like" href="#" id="{coursecode}" onclick="event.preventDefault(); like(this)"><i class="hover:text-yellow-200 transition-all fa-solid fa-thumbs-up"></i></a>
-					/
-					<span id="{coursecode}-dislikes" class="font-bold">{dislikecount}</span>
-					<a title="Dislike" href="#" id="{coursecode}" onclick="event.preventDefault(); dislike(this)"><i class="hover:text-yellow-200 transition-all fa-solid fa-thumbs-down"></i></a>
-				</div>
-				<div class="absolute -top-1 right-0 hover:text-yellow-200 transition-all">
-					<a title="Download course file" href="{coursedownload}" download><i class="fa-solid fa-download"></i></a>
+	</figure>
+
+	<div class="card-body w-96 font-mono p-2">
+		<h2 class="card-title">{coursename}</h2>
+		<p>
+			<div class="text-left">
+				<div class="tooltip" data-tip="Click to copy">
+					<i class="fa-solid fa-file w-4"></i>
+					<a class="hover:text-yellow-400" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText('{coursecode}'); const text = this.innerText; this.innerText = 'Copied!'; setTimeout(() => { this.innerText = text }, 1000);">{coursecode}</a>
 				</div>
 			</div>
+			<div class="text-left">
+				<div class="tooltip" data-tip="Click to toggle SteamID">
+					<i class="fa-solid fa-user w-4"></i>
+					<a class="hover:text-yellow-400" href="#" onclick="event.preventDefault(); this.innerText === '{uploadername}' ? this.innerText = '{uploaderuid}' : this.innerText = '{uploadername}'">{uploadername}</a>
+				</div>
+			</div>
+			<div class="text-left">
+				<i class="fa-solid fa-upload w-4"></i>
+				<span>{fdate}</span>
+			</div>
+		</p>
+
+		<div class="card-actions justify-end">
+			<div class="absolute bottom-0 right-0">
+				<div class="tooltip" data-tip="Like">
+					<button class="btn btn-md btn-square btn-ghost">
+						<a href="#" id="{coursecode}" onclick="event.preventDefault(); like(this)"><i class="fa-solid fa-thumbs-up"></i></a>
+						<span class="badge badge-ghost" id="{coursecode}-likes">{likecount}</span>
+					</button>
+				</div>
+				<div class="tooltip" data-tip="Dislike">
+					<button class="btn btn-md btn-square btn-ghost">
+						<a href="#" id="{coursecode}" onclick="event.preventDefault(); dislike(this)"><i class="fa-solid fa-thumbs-down"></i></a>
+						<span class="badge badge-ghost" id="{coursecode}-dislikes">{dislikecount}</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="absolute top-0 right-0">
+			<button class="btn btn-square btn-ghost tooltip tooltip-left hover:text-yellow-400" data-tip="Download">
+				<a href="{coursedownload}" download><i class="fa-solid fa-download"></i></a>
+			</button>
+			<br>
+			<button class="btn btn-square btn-ghost tooltip tooltip-left hover:text-yellow-400" data-tip="Open course info">
+				<a href="/stats/{coursecode}"><i class="fa-solid fa-info"></i></a>
+			</button>
 		</div>
 	</div>
 </div>

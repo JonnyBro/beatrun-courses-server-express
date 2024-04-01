@@ -1,7 +1,4 @@
 <!DOCTYPE html>
-<html>
-
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -79,98 +76,60 @@
 	</script>
 </head>
 
-<body class="w-screen h-screen bg-stone-900 overflow-x-hidden">
-	<nav class="flex h-12 p-4 w-full bg-gradient-to-r from-red-700 to-red-800 drop-shadow-[0_5px_15px_rgba(0,0,0,0.3)]
-					font-bold text-2xl">
-		<div class="flex flex-row flex-grow">
-			<div class="flex flex-col justify-center text-white p-2 rounded-lg drop-shadow-[0_0px_6px_rgba(0,0,0,0.3)]">
-				<a href="/">beatrun.ru | Courses Database</a>
+<body class="w-screen">
+	<% include ../components/navbar.html %>
+
+	<div class="hero min-h-screen bg-base-200">
+		<div class="hero-content text-center">
+			<div class="text-center align-top w-full">
+				<div class="text-5xl font-bold font-mono">User submitted courses</div>
+
+				<% if (!user) { %>
+					<div class="text-lg font-mono">
+						<a class="link link-warning" href="/key">Authorize with Steam</a> to load and upload these courses in-game!
+					</div>
+				<% } else { %>
+					<div class="text-lg font-mono">
+						Welcome, <b class="hover:text-red-700"><%- locals.sanitize(user.personaname, false, true) %></b>!
+					</div>
+				<% } %>
+
+				<div class="flex">
+					<div class="m-1">
+						<div class="label">
+							<span class="label-text">Page</span>
+						</div>
+						<select class="select" id="pageSelect" onchange="update();">
+							<%- pagesDropdown %>
+						</select>
+					</div>
+
+					<div class="m-1">
+						<div class="label">
+							<span class="label-text">Sorting</span>
+						</div>
+						<select class="select" id="sortValue" onchange="update();">
+							<%- sortDropdown %>
+						</select>
+					</div>
+
+					<div class="m-1">
+						<div class="label">
+							<span class="label-text">Search</span>
+						</div>
+						<input class="input w-full max-w-xs" id="searchQuery" type="text" placeholder="Type here" onkeyup="if (event.key === 'Enter') update();"/>
+						<script> document.getElementById('searchQuery').value = '<%= searchText %>' </script>
+					</div>
+				</div>
+
+				<div id="courses" class="grid xl:grid-cols-2">
+					<%- coursesList %>
+				</div>
 			</div>
 		</div>
-
-		<div class="flex flex-row flex-grow justify-end">
-			<div class="flex flex-col justify-center">
-				<a target="_blank" href="https://discord.com/invite/93Psubbgsg" class="text-base text-white p-2 rounded-lg
-								hover:text-yellow-200 transition-all h-fit bg-opacity-10
-								drop-shadow-[0_0px_6px_rgba(0,0,0,0.3)]">
-					<i class="fa-brands fa-discord"></i>
-				</a>
-			</div>
-
-			<div class="flex flex-col justify-center">
-				<a href="/key" class="text-base text-white p-2 rounded-lg
-										hover:text-yellow-200 transition-all h-fit bg-opacity-10
-										drop-shadow-[0_0px_6px_rgba(0,0,0,0.3)]">
-					<i class="fa-solid fa-right-to-bracket"></i>
-				</a>
-			</div>
-
-			<% if (user && admins[user.steamid]) { %>
-				<div class="flex flex-col justify-center">
-					<a href="/admin" class="text-base text-white p-2 rounded-lg
-											hover:text-yellow-200 transition-all h-fit bg-opacity-10
-											drop-shadow-[0_0px_6px_rgba(0,0,0,0.3)]">
-						<i class="fa-solid fa-user-tie"></i>
-					</a>
-				</div>
-			<% } %>
-		</div>
-	</nav>
-
-	<main class="pt-2 flex flex-grow justify-center">
-		<div class="h-fit m-4 p-2 rounded-lg bg-stone-800 text-white drop-shadow-[0_0px_10px_rgba(0,0,0,0.5)]">
-			<div class="text-center w-full">
-				<div class="p-2 text-2xl font-bold">
-					User submitted courses
-				</div>
-
-				<div class="pb-2 text-base">
-					<% if (!user) { %>
-						<a class="hover:text-yellow-200 transition-all text-red-300" href="/key">Authorize with Steam</a> to load and upload these courses in-game!
-					<% } else { %>
-						Welcome, <b class="hover:text-yellow-200 transition-all"><%- locals.sanitize(user.personaname, false, true) %></b>!
-					<% } %>
-				</div>
-			</div>
-
-			<div class="flex">
-				<div class="p-2">
-					<div class="pb-1 text-sm opacity-50">Page:</div>
-					<select id="pageSelect" onchange="update();" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white">
-						<%- pagesDropdown %>
-					</select>
-				</div>
-
-				<div class="p-2">
-					<div class="pb-1 text-sm opacity-50">Sorting:</div>
-					<select id="sortValue" onchange="update();" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white">
-						<%- sortDropdown %>
-					</select>
-				</div>
-
-				<div class="p-2">
-					<div class="pb-1 text-sm opacity-50">Search:</div>
-					<input onkeyup="if (event.key === 'Enter') update();" id="searchQuery" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white"></input>
-					<script> document.getElementById('searchQuery').value = '<%= searchText %>' </script>
-				</div>
-
-				<div class="p-2">
-					<div class="pb-1 text-sm opacity-0">what are you looking for?</div>
-					<button class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" onclick="update();">Search</button>
-				</div>
-			</div>
-
-			<div id="courses" class="grid xl:grid-cols-2">
-				<%- coursesList %>
-			</div>
-		</div>
-	</main>
-
-	<div class="text-center bottom-0 p-4 text-white opacity-75 text-sm drop-shadow-[0_0px_6px_rgba(0,0,0,0.3)]">
-		Coperight @ Jonny_Bro & rlx 2077
-		<br>
-		Full source code available <a class="hover:text-yellow-200 transition-all text-red-300" href="https://git.jonnybro.ru/jonny_bro/beatrun-courses-server-express/">here</a>!
 	</div>
+
+	<% include ../components/footer.html %>
 </body>
 
 </html>

@@ -4,9 +4,11 @@
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"build": "tailwindcss -i ./tailwind-files/input.css -o ./public/css/style.css",
+		"watch": "tailwindcss -i ./tailwind-files/input.css -o ./public/css/style.css --watch",
 		"start": "node ."
 	},
 	"dependencies": {
+		"daisyui": "^4.9.0",
 		"ejs": "^2.6.1",
 		"express": "^4.16.1",
 		"express-session": "^1.18.0",
