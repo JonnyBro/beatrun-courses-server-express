@@ -36,59 +36,63 @@
 				<div class="text-lg font-mono">Create your own API key here!</div>
 
 				<% if (!user) { %>
-					<div class="pt-5 text-base font-mono text-left">
-						<p>In order to receive your API Key, you must authorize with your Steam account. By doing so, you agree to follow these rules:</p>
-						<ul class="menu bg-base-200 rounded-box">
-							<li><a>1. Don't share your API Key with anyone (using it on different accounts, but on the same network is allowed).</a></li>
-							<li><a>2. Don't post courses with offensive content (name, map, block placement, whatever).</a></li>
-							<li><a>3. Don't upload garbage courses with intent to spam.</a></li>
-						</ul>
-						<p>Failure to obide by these rules will result in your API Key and SteamID being blacklisted.</p><br>
-						<p>As for us, we promise to:</p>
-						<ul class="menu bg-base-200 rounded-box">
-							<li><a>1. Never disclose a person's location, IP or any other private data they might share with us in the future.</a></li>
-							<li><a>2. Store only the necessary data: Last 2 IPs, SteamID and Steam username</a></li>
-						</ul>
-					</div>
+				<div class="pt-5 text-base font-mono text-left">
+					<p>In order to receive your API Key, you must authorize with your Steam account. By doing so, you agree to follow these rules:</p>
+					<ul class="menu bg-base-200 rounded-box">
+						<li><a>1. Don't share your API Key with anyone (using it on different accounts, but on the same network is allowed).</a></li>
+						<li><a>2. Don't post courses with offensive content (name, map, block placement, whatever).</a></li>
+						<li><a>3. Don't upload garbage courses with intent to spam.</a></li>
+					</ul>
+					<p>Failure to obide by these rules will result in your API Key and SteamID being blacklisted.</p><br>
+					<p>As for us, we promise to:</p>
+					<ul class="menu bg-base-200 rounded-box">
+						<li><a>1. Never disclose a person's location, IP or any other private data they might share with us in the future.</a></li>
+						<li><a>2. Store only the necessary data: Last 2 IPs, SteamID and Steam username</a></li>
+					</ul>
+				</div>
 
-					<div class="pt-5 flex justify-center">
-						<a class="justify-center" href="/auth">
-							<button class="btn btn-primary hover:bg-red-700" type="submit">Log-in with Steam</button>
-						</a>
-					</div>
+				<div class="pt-5 flex justify-center">
+					<a class="justify-center" href="/auth">
+						<button class="btn btn-primary hover:bg-red-700" type="submit">Log-in with Steam</button>
+					</a>
+				</div>
 				<% } else { %>
 				<div class="pt-5 font-mono text-left">
-						Great! Welcome to our little community.
-						<br>
-						<b>To get started, make sure you're using <a class="link link-warning" target="_blank" href="https://github.com/JonnyBro/beatrun">this</a> version of beatrun!</b>
-						<br><br>
-						Use this command below in console to save your API key in-game:
-						<br>
-						<li><code><strong>beatrun_apikey <%- user.authKey %></strong></code></li>
-						And you're done!
-						<br><br>
-						You can now load any course you want, as seen on the main page!
-						<br>
-						<li><code><strong>beatrun_loadcode ABCD-1234-XYZX</strong></code></li>
-						Have fun!
+					Great! Welcome to our little community.
+					<br>
+					<b>To get started, make sure you're using <a class="link link-warning" target="_blank" href="https://github.com/JonnyBro/beatrun">this</a> version of Beatrun!</b>
+					<br><br>
+					<div class="font-mono text-left">
+						<strong>Your authkey is:</strong>
+						<div class="tooltip" data-tip="Click To Copy">
+							<a class="hover:text-red-300" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText(this.innerText)">
+								<%- user.authKey %>
+							</a>
+						</div>
 					</div>
 					<br>
-					<div class="font-mono text-left">
-						Your authkey is:
-						<b>
-							<div class="tooltip" data-tip="Click To Copy">
-								<a id="key" class="hover:text-red-200" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText(this.innerText)">
-									<%- user.authKey %>
-								</a>
-							</div>
-						</b>
-					</div>
-
-					<div class="pt-5 flex justify-center">
-						<a class="justify-center" href="/auth/logout">
-							<button class="btn btn-primary hover:bg-red-700" type="submit">Logout</button>
+					Use this command below in console to save your API key in-game:
+					<br>
+					<div class="tooltip tooltip-right" data-tip="Click To Copy">
+						<a class="hover:text-red-300" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText(this.innerText)">
+							<strong>Beatrun_Apikey <%- user.authKey %></strong>
 						</a>
 					</div>
+					<br>
+					And you're done!
+					<br><br>
+					You can now load any course you want, as seen on the main page!
+					<br>
+					<strong>Beatrun_LoadCode ABCD-1234-XYZX</strong>
+					<br><br>
+					<strong>Have fun!</strong>
+				</div>
+
+				<div class="pt-5 flex justify-center">
+					<a class="justify-center" href="/auth/logout">
+						<button class="btn btn-primary hover:bg-red-700" type="submit">Logout</button>
+					</a>
+				</div>
 				<% } %>
 			</div>
 		</div>

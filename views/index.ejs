@@ -85,13 +85,13 @@
 				<div class="text-5xl font-bold font-mono">User submitted courses</div>
 
 				<% if (!user) { %>
-					<div class="text-lg font-mono">
-						<a class="link link-warning" href="/key">Authorize with Steam</a> to load and upload these courses in-game!
-					</div>
+				<div class="text-lg font-mono">
+					<a class="link link-warning" href="/key">Authorize with Steam</a> to load and upload these courses in-game!
+				</div>
 				<% } else { %>
-					<div class="text-lg font-mono">
-						Welcome, <b class="hover:text-red-700"><%- locals.sanitize(user.personaname, false, true) %></b>!
-					</div>
+				<div class="text-lg font-mono">
+					Welcome, <b class="hover:text-red-700"><%- locals.sanitize(user.personaname, false, true) %></b>!
+				</div>
 				<% } %>
 
 				<div class="flex">
@@ -117,8 +117,10 @@
 						<div class="label">
 							<span class="label-text">Search</span>
 						</div>
-						<input class="input w-full max-w-xs" id="searchQuery" type="text" placeholder="Type here" onkeyup="if (event.key === 'Enter') update();"/>
-						<script> document.getElementById('searchQuery').value = '<%= searchText %>' </script>
+						<input class="input w-full max-w-xs" id="searchQuery" type="text" placeholder="Type here" onkeyup="if (event.key === 'Enter') update();" />
+						<script>
+							document.getElementById('searchQuery').value = '<%= searchText %>'
+						</script>
 					</div>
 				</div>
 

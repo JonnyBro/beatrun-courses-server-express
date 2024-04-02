@@ -26,9 +26,7 @@
 
 	<script>
 		function sendAction(args) {
-			const {
-				action
-			} = args;
+			const { action } = args;
 			const responseBox = document.getElementById("responseBox");
 
 			const xhr = new XMLHttpRequest();
@@ -58,41 +56,41 @@
 				<div class="pb-2 font-mono">I admin'd all over the place</div>
 
 				<div class="flex">
-					<input type="text" id="addKeyInput" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" placeholder="SteamID64">
-					<input type="submit" onclick="event.preventDefault(); sendAction({ action: 'addKey', target: document.getElementById('addKeyInput').value })" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Add Key">
+					<input class="input m-1" id="addKeyInput" type="text" placeholder="SteamID64" />
+					<input class="btn btn-primary m-1" type="submit" onclick="event.preventDefault(); sendAction({ action: 'addKey', target: document.getElementById('addKeyInput').value })" value="Add Key" />
 				</div>
 				<br>
 				<div class="flex">
-					<input type="text" id="removeKeyInput" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" placeholder="SteamID64">
-					<input type="submit" onclick="event.preventDefault(); sendAction({ action: 'removeKey', target: document.getElementById('removeKeyInput').value })" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" role="button" value="Remove Key">
+					<input class="input m-1" id="removeKeyInput" type="text" placeholder="SteamID64" />
+					<input class="btn btn-primary m-1" type="submit" onclick="event.preventDefault(); sendAction({ action: 'removeKey', target: document.getElementById('removeKeyInput').value })" value="Remove Key" />
 				</div>
 				<br>
 				<div class="flex">
-					<input type="text" id="lockUserInput" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" placeholder="Authkey/SteamID64/IP">
-					<input type="submit" onclick="event.preventDefault(); sendAction({ action: 'lockUser', target: document.getElementById('lockUserInput').value })" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Lock">
+					<input class="input m-1" id="lockUserInput" type="text" placeholder="SteamID64" />
+					<input class="btn btn-primary m-1" type="submit" onclick="event.preventDefault(); sendAction({ action: 'lockUser', target: document.getElementById('lockUserInput').value })" value="Lock SteamID" />
 				</div>
 				<br>
 				<div class="flex">
-					<input type="text" id="unlockUserInput" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" placeholder="Authkey/SteamID64/IP">
-					<input type="submit" onclick="event.preventDefault(); sendAction({ action: 'unlockUser', target: document.getElementById('unlockUserInput').value })" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" style="width: auto" role="button" value="Unlock">
+					<input class="input m-1" id="unlockUserInput" type="text" placeholder="SteamID64" />
+					<input class="btn btn-primary m-1" type="submit" onclick="event.preventDefault(); sendAction({ action: 'unlockUser', target: document.getElementById('unlockUserInput').value })" value="Unlock SteamID" />
 				</div>
 				<br>
 				<div class="flex">
-					<input type="text" id="removeCourseInput" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white" style="width: auto" placeholder="Course Code">
-					<input type="submit" onclick="event.preventDefault(); sendAction({ action: 'removeCourse', target: document.getElementById('removeCourseInput').value })" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" style="width: auto" role="button" value="Remove Course">
+					<input class="input m-1" id="removeCourseInput" type="text" placeholder="Course Code" />
+					<input class="btn btn-primary m-1" type="submit" onclick="event.preventDefault(); sendAction({ action: 'removeCourse', target: document.getElementById('removeCourseInput').value })" value="Delete Course" />
 				</div>
 				<br>
 				<div class="flex">
-					<input type="submit" id="showLogs" onclick="event.preventDefault(); sendAction({ action: 'showLogs' })" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Show logs">
-					<input type="submit" id="showRecords" onclick="event.preventDefault(); sendAction({ action: 'showRecords' })" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Show records">
-					<input type="submit" id="showLocks" onclick="event.preventDefault(); sendAction({ action: 'showLocks' })" class="text-sm rounded-lg focus:ring-yellow-200 focus:border-yellow-300 block w-fit p-2.5 bg-stone-700 border-stone-600 placeholder-stone-400 text-white hover:bg-stone-500 active:bg-stone-400 transition-all" role="button" style="width: auto" value="Show locks">
+					<input class="btn btn-primary m-1" type="submit" id="showLogs" onclick="event.preventDefault(); sendAction({ action: 'showLogs' })" value="Show logs" />
+					<input class="btn btn-primary m-1" type="submit" id="showRecords" onclick="event.preventDefault(); sendAction({ action: 'showRecords' })" value="Show records" />
+					<input class="btn btn-primary m-1" type="submit" id="showLocks" onclick="event.preventDefault(); sendAction({ action: 'showLocks' })" value="Show locks" />
 				</div>
 				<br>
 				<br>
 				<div class="text-left">
 					Server response:<br>
 					<div class="mockup-window border border-base-300">
-						<div class="flex justify-center px-4 py-16 border-t border-base-300">
+						<div class="flex justify-center px-4 border-t border-base-300">
 							<code id="responseBox">
 								nothing...
 							</code>

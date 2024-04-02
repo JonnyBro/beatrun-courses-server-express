@@ -25,7 +25,6 @@ async function hasGame(locals, user) {
 	return false;
 }
 
-
 /**
  * Registers a user by checking account age and ownership of Garry's Mod,
  * generating an auth key, recording their username, and returning the auth key.

@@ -250,7 +250,9 @@ router.post("/admin", isAdmin, async (req, res) => {
 	} else if (action === "showLocks") {
 		const locked = await req.app.locals.db.getData("/locked");
 
-		const message = Object.keys(locked).length === 0 ? JSON.stringify(locked) : Object.keys(locked).map(x => `${x} - ${locked[x]}`).join("\n");
+		const message = Object.keys(locked).length === 0
+			? JSON.stringify(locked)
+			: Object.keys(locked).map(x => `${x} - ${locked[x]}`).join("\n");
 
 		res.send({ success: true, message: message });
 	} else return res.send({ success: false, message: "Invalid action provided." });

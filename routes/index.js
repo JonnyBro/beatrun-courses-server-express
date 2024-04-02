@@ -71,7 +71,7 @@ router.get("/", async (req, res) => {
 
 		if (codeData.mapimg) codeMapImage = codeData.mapimg;
 
-		const codeMapId = (codeData.mapid !== "0" && codeData.mapid !== "") ? codeData.mapid : "2818480138"; // le troll
+		const codeMapId = codeData.mapid !== "0" && codeData.mapid !== "" ? codeData.mapid : "2818480138"; // le troll
 		const codeUserId = codeData.uploader.userid;
 		const codeUsername = usernames[codeUserId] ? usernames[codeUserId] : codeUserId;
 
@@ -111,9 +111,10 @@ router.get("/", async (req, res) => {
 		5: ["scoredumb", "DESC"],
 	};
 
-	if (sortType === "none") sortedCodesData = codesData.sort((a, b) => {
-		return b.time - a.time;
-	});
+	if (sortType === "none")
+		sortedCodesData = codesData.sort((a, b) => {
+			return b.time - a.time;
+		});
 	else {
 		const sortKey = sortKeys[sortType];
 
@@ -127,19 +128,20 @@ router.get("/", async (req, res) => {
 			});
 	}
 
-	if (search) sortedCodesData = codesData.filter(c => {
-		const query = req.app.locals.sanitize(search, true, false);
+	if (search)
+		sortedCodesData = codesData.filter(c => {
+			const query = req.app.locals.sanitize(search, true, false);
 
-		let searchString = "";
-		searchString += c.name;
-		searchString += c.code;
-		searchString += c.userid;
-		searchString += c.username;
-		searchString += c.map;
-		searchString += c.mapwid;
+			let searchString = "";
+			searchString += c.name;
+			searchString += c.code;
+			searchString += c.userid;
+			searchString += c.username;
+			searchString += c.map;
+			searchString += c.mapwid;
 
-		return searchString.toLowerCase().includes(query);
-	});
+			return searchString.toLowerCase().includes(query);
+		});
 
 	sortedCodesData.forEach(data => cards.push(generateCourseCard(data)));
 
