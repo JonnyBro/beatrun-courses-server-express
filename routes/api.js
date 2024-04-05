@@ -68,7 +68,10 @@ router.get("/download", isUserGame, async (req, res) => {
 
 	const file = fs.readFileSync(`public/${courseData.path}`, "utf-8");
 
-	await req.app.locals.log(`[DOWNLOAD] Served a course for user (Course: ${headers.code}, SteamID: ${steamid}, Key ${key}).`);
+	await req.app.locals.log(
+		`[DOWNLOAD] Served a course for user (Course: ${headers.code}, SteamID: ${steamid}, Key ${key}).`,
+		`[DOWNLOAD] Served a course for user (Course: \`${headers.code}\`, SteamID: \`${steamid}\`, Key \`${key}\`).`,
+	);
 	res.send({ res: res.statusCode, file: file });
 });
 
@@ -122,7 +125,10 @@ router.post("/upload", isUserGame, async (req, res) => {
 		},
 	}, false);
 
-	await req.app.locals.log(`[UPLOAD] User uploaded a course (Course: ${code}, SteamID: ${steamIds[key]}, Key ${key}).`);
+	await req.app.locals.log(
+		`[UPLOAD] User uploaded a course (Course: ${code}, SteamID: ${steamIds[key]}, Key ${key}).`,
+		`[UPLOAD] User uploaded a course (Course: \`${code}\`, SteamID: \`${steamIds[key]}\`, Key \`${key}\`).`,
+	);
 	res.send({ res: res.statusCode, code: code });
 });
 
@@ -161,7 +167,10 @@ router.post("/update", isUserGame, async (req, res) => {
 
 	await req.app.locals.db.push(`/courses/${headers.code}`, courseData);
 
-	await req.app.locals.log(`[UPDATE] User updated a course (Course: ${headers.code}, SteamID: ${steamIds[key]}, Key ${key}).`);
+	await req.app.locals.log(
+		`[UPDATE] User updated a course (Course: ${headers.code}, SteamID: ${steamIds[key]}, Key ${key}).`,
+		`[UPDATE] User updated a course (Course: \`${headers.code}\`, SteamID: \`${steamIds[key]}\`, Key \`${key}\`).`,
+	);
 	res.send({ res: res.statusCode, code: headers.code });
 });
 
@@ -260,7 +269,6 @@ router.post("/admin", isAdmin, async (req, res) => {
 
 router.get("/admin", isAdmin, async (req, res) => {
 	res.send("Hello get");
-	console.log(req.headers);
 });
 
 function generateCode(locals) {

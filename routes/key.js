@@ -34,15 +34,8 @@ async function hasGame(locals, user) {
  * @returns {Promise<string>} A promise that resolves to the auth key string.
  */
 async function registerUser(locals, user) {
-	if (Math.floor((new Date() - new Date(user.timecreated * 1000)) / (1000 * 60 * 60 * 24 * 30)) < 3) {
-		await locals.log(`[KEY] Account too young (SteamID: ${user.steamid}, TimeCreated: ${user.timecreated}).`);
-		return "Account too young. Needs to be at least 3 months old.";
-	}
-
-	if (!hasGame(locals, user)) {
-		await locals.log(`[KEY] Game not found (SteamID: ${user.steamid})`);
-		return "Account doesn't have Garry's mod. Make sure your game details are public.";
-	}
+	if (Math.floor((new Date() - new Date(user.timecreated * 1000)) / (1000 * 60 * 60 * 24 * 30)) < 3) return "Account too young. Needs to be at least 3 months old.";
+	if (!hasGame(locals, user)) return "Account doesn't have Garry's mod. Make sure your game details are public.";
 
 	const usernames = await locals.db.getData("/usernames");
 	const key = await locals.getKey(user);

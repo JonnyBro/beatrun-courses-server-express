@@ -14,6 +14,6 @@ This is project is a rewrite of the [original](https://github.com/JonnyBro/beatr
 ## TODO
 
 * [X] Rewrite admin page.
-* [ ] Make admin page look better.
+* [X] Make admin page look better.
 * [ ] Refactor some stupid code that I will find.
 * [ ] Add something else? (speedruns uploads leak??)

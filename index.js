@@ -4,6 +4,7 @@ const express = require("express"),
 	logger = require("morgan"),
 	fs = require("fs"),
 	passport = require("passport"),
+	fetch = require("node-fetch"),
 	SteamStrategy = require("passport-steam").Strategy;
 
 const { JsonDB, Config } = require("node-json-db");
@@ -127,7 +128,10 @@ async function getKey(user) {
 	const key = keys[user];
 
 	if (key) {
-		await log(`[KEY] User logged in (SteamID: ${user}, Key ${key}).`);
+		await log(
+			`[KEY] User logged in (SteamID: ${user}, Key ${key}).`,
+			`[KEY] User logged in (SteamID: \`${user}\`, Key \`${key}\`).`,
+		);
 		return key;
 	} else return await _createKey(user);
 }
@@ -148,7 +152,10 @@ async function _createKey(user) {
 	if (!isFound) {
 		keys[user] = key;
 
-		await app.locals.log(`[KEY] New user (SteamID: ${user}, TimeCreated: ${typeof user === "string" ? "Unknown" : user.timecreated}, Key: ${key}).`);
+		await log(
+			`[KEY] New user (SteamID: ${user}, TimeCreated: ${typeof user === "string" ? "Unknown" : user.timecreated}, Key: ${key}).`,
+			`[KEY] New user (SteamID: \`${user}\`, TimeCreated: \`${typeof user === "string" ? "Unknown" : user.timecreated}\`, Key: \`${key}\`).`,
+		);
 		await db.push("/keys", keys);
 
 		return key;
@@ -262,13 +269,28 @@ function sanitize(string = "", forceLowercase = true, strict = false) {
 }
 
 /**
- * Logs a message to a log file.
+ * Logs a message to a log file and optionally sends it to a Discord webhook.
  *
- * @param {string} message The message to log.
+ * @param {string} logs_message - The message to be logged.
+ * @param {string} discord_message - The message to be sent to the Discord webhook (optional).
+ * @returns {Promise<boolean>} - A promise that resolves to `true` if the logging was successful, or `false` otherwise.
  */
-async function log(message) {
-	fs.writeFile("data/logs.log", `[${new Date(Date.now()).toLocaleString("ru-RU")}] - ${message}\n`, { flag: "a" }, err => {
+async function log(logs_message, discord_message) {
+	fs.writeFile("data/logs.log", `[${new Date(Date.now()).toLocaleString("ru-RU")}] - ${logs_message}\n`, { flag: "a" }, async err => {
 		if (err) throw err;
+
+		if (config.webhook_url)
+			await fetch(config.webhook_url, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					username: "Courses Logger",
+					content: discord_message ?? logs_message,
+				}),
+			});
+
 		return true;
 	});
 }
