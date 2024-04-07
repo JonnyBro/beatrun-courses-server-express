@@ -1,63 +1,69 @@
 <div class="card card-side w-fit bg-red-700 shadow-xl m-1">
 	<figure>
 		<div class="relative">
-			<img src="{mapimagesrc}" style="height: 10.5rem; width: 12rem" class="object-fill">
+			<img src="{mapImage}" style="height: 10.5rem; width: 12rem" class="object-fill">
 
 			<div class="absolute bottom-0 text-left text-sm font-mono drop-shadow-[0_0px_2px_rgba(0,0,0,1)]">
 				<div class="bg-black bg-opacity-30 p-1">
-					<a class="link link-warning link-hover text-white" target="_blank" href="https://steamcommunity.com/sharedfiles/filedetails/?id={mapwid}">{coursemap}</a><br>
-					{elementcount}
+					<a class="link link-warning link-hover text-white" target="_blank" href="https://steamcommunity.com/sharedfiles/filedetails/?id={mapID}">{courseMap}</a><br>
+					{elementsCount}
 				</div>
 			</div>
 		</div>
 	</figure>
 
 	<div class="card-body w-96 font-mono p-2">
-		<h2 class="card-title">{coursename}</h2>
+		<h2 class="card-title">{courseName}</h2>
 		<p>
 			<div class="text-left">
 				<div class="tooltip" data-tip="Click to copy">
 					<i class="fa-solid fa-file w-4"></i>
-					<a class="hover:text-yellow-400" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText('{coursecode}'); const text = this.innerText; this.innerText = 'Copied!'; setTimeout(() => { this.innerText = text }, 1000);">{coursecode}</a>
+					<a class="hover:text-yellow-400" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText('{courseCode}'); const text = this.innerText; this.innerText = 'Copied!'; setTimeout(() => { this.innerText = text }, 1000);">{courseCode}</a>
 				</div>
 			</div>
 			<div class="text-left">
 				<div class="tooltip" data-tip="Click to toggle SteamID">
 					<i class="fa-solid fa-user w-4"></i>
-					<a class="hover:text-yellow-400" href="#" onclick="event.preventDefault(); this.innerText === '{uploadername}' ? this.innerText = '{uploaderuid}' : this.innerText = '{uploadername}'">{uploadername}</a>
+					<a class="hover:text-yellow-400" href="#" onclick="event.preventDefault(); this.innerText === '{uploaderName}' ? this.innerText = '{uploaderID}' : this.innerText = '{uploaderName}'">{uploaderName}</a>
 				</div>
 			</div>
 			<div class="text-left">
 				<i class="fa-solid fa-upload w-4"></i>
-				<span>{fdate}</span>
+				<span>{uploadDate}</span>
+				<i class="fa-solid fa-download w-4"></i>
+				<span>{plays}</span>
 			</div>
 		</p>
 
 		<div class="card-actions justify-end">
 			<div class="absolute bottom-0 right-0">
-				<div class="tooltip" data-tip="Like">
-					<button class="btn btn-md btn-square btn-ghost">
-						<a href="#" id="{coursecode}" onclick="event.preventDefault(); like(this)"><i class="fa-solid fa-thumbs-up"></i></a>
-						<span class="badge badge-ghost" id="{coursecode}-likes">{likecount}</span>
-					</button>
+				<div class="tooltip" data-tip="Likes">
+					<a class="btn btn-md btn-square btn-ghost hover:text-yellow-400" href="#" id="{courseCode}" onclick="event.preventDefault(); like(this)">
+						<span class="badge badge-ghost" id="{courseCode}-likes">{likesCount}</span>
+						<i class="fa-solid fa-thumbs-up"></i>
+					</a>
 				</div>
-				<div class="tooltip" data-tip="Dislike">
-					<button class="btn btn-md btn-square btn-ghost">
-						<a href="#" id="{coursecode}" onclick="event.preventDefault(); dislike(this)"><i class="fa-solid fa-thumbs-down"></i></a>
-						<span class="badge badge-ghost" id="{coursecode}-dislikes">{dislikecount}</span>
-					</button>
+				<div class="tooltip" data-tip="Dislikes">
+					<a class="btn btn-md btn-square btn-ghost hover:text-yellow-400" href="#" id="{courseCode}" onclick="event.preventDefault(); dislike(this)">
+						<span class="badge badge-ghost" id="{courseCode}-dislikes">{dislikesCount}</span>
+						<i class="fa-solid fa-thumbs-down"></i>
+					</a>
 				</div>
 			</div>
 		</div>
 
 		<div class="absolute top-0 right-0">
-			<button class="btn btn-square btn-ghost tooltip tooltip-left hover:text-yellow-400" data-tip="Download">
-				<a href="{coursedownload}" download><i class="fa-solid fa-download"></i></a>
-			</button>
+			<div class="tooltip tooltip-left" data-tip="Download">
+				<a class="btn btn-square btn-ghost hover:text-yellow-400" href="{downloadLink}" download>
+					<i class="fa-solid fa-download"></i>
+				</a>
+			</div>
 			<br>
-			<button class="btn btn-square btn-ghost tooltip tooltip-left hover:text-yellow-400" data-tip="Open course info">
-				<a href="/stats/{coursecode}"><i class="fa-solid fa-info"></i></a>
-			</button>
+			<div class="tooltip tooltip-left" data-tip="Open course info">
+				<a class="btn btn-square btn-ghost hover:text-yellow-400" href="/stats/{courseCode}">
+					<i class="fa-solid fa-info"></i>
+				</a>
+			</div>
 		</div>
 	</div>
 </div>

@@ -4,41 +4,7 @@ const express = require("express"),
 	openGraphScraper = require("open-graph-scraper"),
 	lzma = require("lzma");
 
-async function isAdmin(req, res, next) {
-	if (!req.user || !req.app.locals.admins[req.user.steamid]) return res.redirect("/key");
-
-	const admins = req.app.locals.admins;
-	const steamid = req.user.steamid;
-
-	if (!admins[steamid]) return res.status(401).json({ res: res.statusCode, message: "Unauthorized." });
-
-	return next();
-}
-
-async function isUser(req, res, next) {
-	if (!req.user || !req.app.locals.admins[req.user.steamid]) return res.redirect("/key");
-
-	const keys = await req.app.locals.db.getData("/keys");
-	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
-	const key = req.user.authKey;
-
-	if (!steamIds[key]) return res.status(401).json({ res: res.statusCode, message: "Unauthorized." });
-
-	return next();
-}
-
-async function isUserGame(req, res, next) {
-	// if (req.get("user-agent") !== "Valve/Steam HTTP Client 1.0 GMod/13") return res.status(401).json({ res: res.statusCode, message: "Not in-game" });
-
-	const keys = await req.app.locals.db.getData("/keys");
-	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
-	const key = req.headers.authorization;
-
-	if (!key) return res.status(401).json({ res: res.statusCode, message: "Unauthorized. Please provide a key." });
-	if (!steamIds[key]) return res.status(401).json({ res: res.statusCode, message: `Unauthorized. Get yourself a key on ${req.app.locals.config.domain}/key` });
-
-	return next();
-}
+const { isAdmin, isUser, isUserGame, generateRandomString, isCourseFileValid, log } = require("../utils/functions");
 
 router.post("/", isUser, async (req, res) => {
 	res.send("Hello World!");
@@ -62,16 +28,28 @@ router.get("/download", isUserGame, async (req, res) => {
 	if (ip !== "Unknown" && (await req.app.locals.isRatelimited(ip))) return res.status(401).json({ res: res.statusCode, message: "Too many requests. Please try again later." });
 	if (ip !== "Unknown" && (await req.app.locals.isMultiAccount(ip, steamid))) return res.status(401).json({ res: res.statusCode, message: "Your account was detected as multiaccount. Please open a ticket on our Discord server." });
 
-	const courseData = await req.app.locals.db.getData(`/courses/${headers.code}`);
+	let courseData;
+
+	try {
+		courseData = await req.app.locals.db.getData(`/courses/${headers.code}`);
+	} catch (e) {
+		return res.status(401).json({ res: res.statusCode, message: "Invalid course code provided." });
+	}
 
 	if (courseData.map !== headers.map) return res.status(401).json({ res: res.statusCode, message: "Invalid map. Please start a map that require by course you provided." });
 
 	const file = fs.readFileSync(`public/${courseData.path}`, "utf-8");
 
-	await req.app.locals.log(
+	await log(
 		`[DOWNLOAD] Served a course for user (Course: ${headers.code}, SteamID: ${steamid}, Key ${key}).`,
 		`[DOWNLOAD] Served a course for user (Course: \`${headers.code}\`, SteamID: \`${steamid}\`, Key \`${key}\`).`,
 	);
+
+	if (!courseData.plays) courseData.plays = 1;
+	else courseData.plays++;
+
+	await req.app.locals.db.push(`/courses/${headers.code}`, courseData);
+
 	res.send({ res: res.statusCode, file: file });
 });
 
@@ -97,13 +75,13 @@ router.post("/upload", isUserGame, async (req, res) => {
 		course = Buffer.from(headers.course, "base64").toString("utf-8");
 	}
 
-	if (!req.app.locals.isCourseFileValid(JSON.parse(course))) return res.status(401).json({ res: res.statusCode, message: "Invalid course file. Please provide a valid course." });
+	if (!isCourseFileValid(JSON.parse(course))) return res.status(401).json({ res: res.statusCode, message: "Invalid course file. Please provide a valid course." });
 
-	let code = generateCode(req.app.locals);
+	let code = generateCode();
 	let file = `public/courses/${code}.txt`;
 
 	do {
-		code = generateCode(req.app.locals);
+		code = generateCode();
 		file = `public/courses/${code}.txt`;
 	} while (fs.existsSync(file));
 
@@ -122,10 +100,11 @@ router.post("/upload", isUserGame, async (req, res) => {
 			path: `courses/${code}.txt`,
 			mapid: headers.mapid === "0" || headers.mapid === "no_map_id" ? "" : headers.mapid,
 			mapimg: mapImage,
+			plays: 0,
 		},
 	}, false);
 
-	await req.app.locals.log(
+	await log(
 		`[UPLOAD] User uploaded a course (Course: ${code}, SteamID: ${steamIds[key]}, Key ${key}).`,
 		`[UPLOAD] User uploaded a course (Course: \`${code}\`, SteamID: \`${steamIds[key]}\`, Key \`${key}\`).`,
 	);
@@ -159,7 +138,7 @@ router.post("/update", isUserGame, async (req, res) => {
 		course = Buffer.from(headers.course, "base64").toString("utf-8");
 	}
 
-	if (!req.app.locals.isCourseFileValid(JSON.parse(course))) return res.status(401).json({ res: res.statusCode, message: "Invalid course file. Please provide a valid course." });
+	if (!isCourseFileValid(JSON.parse(course))) return res.status(401).json({ res: res.statusCode, message: "Invalid course file. Please provide a valid course." });
 
 	fs.writeFileSync(`public/courses/${headers.code}.txt`, course, "utf-8");
 
@@ -167,7 +146,7 @@ router.post("/update", isUserGame, async (req, res) => {
 
 	await req.app.locals.db.push(`/courses/${headers.code}`, courseData);
 
-	await req.app.locals.log(
+	await log(
 		`[UPDATE] User updated a course (Course: ${headers.code}, SteamID: ${steamIds[key]}, Key ${key}).`,
 		`[UPDATE] User updated a course (Course: \`${headers.code}\`, SteamID: \`${steamIds[key]}\`, Key \`${key}\`).`,
 	);
@@ -271,11 +250,28 @@ router.get("/admin", isAdmin, async (req, res) => {
 	res.send("Hello get");
 });
 
-function generateCode(locals) {
+router.get("/stats/:code", async (req, res) => {
+	let course;
+
+	try {
+		course = await req.app.locals.db.getData(`/courses/${req.params.code}`);
+	} catch (e) {
+		return res.status(401).json({ res: res.statusCode, message: "Invalid course code provided." });
+	}
+
+	const usernames = await req.app.locals.db.getData("/usernames");
+
+	delete course.uploader.authkey;
+	course.uploader.name = usernames[course.uploader.userid];
+
+	res.send({ res: res.statusCode, course: course });
+});
+
+function generateCode() {
 	let code = "";
 
 	for (let i = 0; i < 3; i++) {
-		code += locals.generateRandomString(4);
+		code += generateRandomString(4);
 
 		if (i === 0 || i === 1) code += "-";
 	}
@@ -283,4 +279,4 @@ function generateCode(locals) {
 	return code.toUpperCase();
 }
 
-module.exports = { router: router, isUser: isUser, isUserGame: isUserGame, isAdmin: isAdmin };
+module.exports = router;

@@ -1,6 +1,9 @@
 const express = require("express"),
 	router = express.Router(),
-	fs = require("fs");
+	fs = require("fs"),
+	courseCardComponent = fs.readFileSync("components/course_card.html", "utf-8");
+
+const { sanitize, isCourseFileValid } = require("../utils/functions");
 
 router.get("/", async (req, res) => {
 	const courses = await req.app.locals.db.getData("/courses");
@@ -57,12 +60,12 @@ router.get("/", async (req, res) => {
 		try {
 			codeFile = fs.readFileSync(`public/${codeData.path}`, "utf-8");
 		} catch (e) {
-			return console.log("not found file for: " + code);
+			return console.log(`[WARINGN] Not found file for: ${code}`);
 		}
 
 		const parsedCodeFile = JSON.parse(codeFile);
 
-		if (!req.app.locals.isCourseFileValid(parsedCodeFile)) console.log("course is not valid: " + code);
+		if (!isCourseFileValid(parsedCodeFile)) console.log(`[WARNING] Course is not valid: ${code}`);
 
 		let codeMapImage = "img/unknown.jpg";
 
@@ -97,6 +100,7 @@ router.get("/", async (req, res) => {
 			mapimg: codeMapImage,
 			mapwid: codeMapId,
 			time: codeData.time,
+			plays: codeData.plays,
 		});
 	});
 
@@ -109,6 +113,7 @@ router.get("/", async (req, res) => {
 		3: ["elements", "DESC"],
 		4: ["scoresmart", "DESC"],
 		5: ["scoredumb", "DESC"],
+		6: ["plays", "DESC"],
 	};
 
 	if (sortType === "none")
@@ -130,7 +135,7 @@ router.get("/", async (req, res) => {
 
 	if (search)
 		sortedCodesData = codesData.filter(c => {
-			const query = req.app.locals.sanitize(search, true, false);
+			const query = sanitize(search, true, false);
 
 			let searchString = "";
 			searchString += c.name;
@@ -154,6 +159,7 @@ router.get("/", async (req, res) => {
 		sortDropdown: sortDropdown,
 		coursesList: sortedCards,
 		searchText: search,
+		sanitize,
 	});
 
 	await req.app.locals.db.push("/rating", ratings);
@@ -197,24 +203,22 @@ function getCourseRating(data) {
  * @returns {String} The generated HTML string for the course card
  */
 function generateCourseCard(course) {
-	const courseCardComponent = fs.readFileSync("components/course_card.html", "utf-8");
-
 	const templates = {
-		"{coursename}": course.name,
-		"{coursecode}": course.code,
-		"{uploaderuid}": course.userid,
-		"{uploadername}": course.username,
-		"{coursemap}": course.map,
-		"{coursedownload}": course.download,
-		"{likecount}": course.likes,
-		"{dislikecount}": course.dislikes,
+		"{courseName}": course.name,
+		"{courseCode}": course.code,
+		"{uploaderID}": course.userid,
+		"{uploaderName}": course.username,
+		"{courseMap}": course.map,
+		"{downloadLink}": course.download,
+		"{likesCount}": course.likes,
+		"{dislikesCount}": course.dislikes,
 		"{ratesmart}": course.scoresmart,
 		"{ratedumb}": course.scoredumb,
-		"{time}": course.time,
-		"{mapimagesrc}": course.mapimg,
-		"{mapwid}": course.mapwid,
-		"{elementcount}": `${course.elements} ${course.elements > 1 ? "elements" : "element"}`,
-		"{fdate}": new Date(course.time).toLocaleString("ru-RU").split(", ")[0],
+		"{mapImage}": course.mapimg,
+		"{mapID}": course.mapwid,
+		"{elementsCount}": course.elements === 1 ? "1 element" : `${course.elements} elements`,
+		"{uploadDate}": new Date(course.time).toLocaleString("ru-RU").split(", ")[0],
+		"{plays}": course.plays === 1 ? "1 play" : `${course.plays || 0} plays`,
 	};
 
 	let output = courseCardComponent;

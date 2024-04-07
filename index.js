@@ -4,23 +4,22 @@ const express = require("express"),
 	logger = require("morgan"),
 	fs = require("fs"),
 	passport = require("passport"),
-	fetch = require("node-fetch"),
 	SteamStrategy = require("passport-steam").Strategy;
 
-const { JsonDB, Config } = require("node-json-db");
+const { JsonDB, Config } = require("node-json-db"),
+	{ generateRandomString, log } = require("./utils/functions");
 
 const config = require("./config");
 const db = new JsonDB(new Config(`data/${config.production ? "main" : "test"}_db`, true, true, "/"));
 
+if (!config.cookieSecret || !config.steamKey) return console.log("Please check that you have filled steamKey and cookieSecret in config file");
 if (!fs.existsSync("public/courses/")) fs.mkdirSync("public/courses/");
-if (!fs.existsSync("data/")) fs.mkdirSync("data/");
 
 // Express App
-
 const indexRouter = require("./routes/index"),
 	keyRouter = require("./routes/key"),
 	adminRouter = require("./routes/admin"),
-	{ router: apiRouter } = require("./routes/api"),
+	apiRouter = require("./routes/api"),
 	statsRouter = require("./routes/stats");
 
 const app = express();
@@ -40,13 +39,12 @@ passport.use(
 			returnURL: `${config.domain}/auth/return`,
 			apiKey: config.steamKey,
 		},
-		(identifier, profile, done) => {
+		(_, profile, done) => {
 			return done(null, profile);
 		},
 	),
 );
 
-// view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
@@ -103,13 +101,9 @@ db.getData("/admins").then(data => {
 app.locals = {
 	config: config,
 	db: db,
-	log: log,
-	sanitize: sanitize,
 	getKey: getKey,
 	isRatelimited: isRatelimited,
 	isMultiAccount: isMultiAccount,
-	isCourseFileValid: isCourseFileValid,
-	generateRandomString: generateRandomString,
 };
 
 /**
@@ -163,19 +157,6 @@ async function _createKey(user) {
 }
 
 /**
- * Validates that a course file content array is valid.
- *
- * @param {any[]} content The course file content array to validate
- * @returns {Boolean} True if the content is a valid course file array
- */
-function isCourseFileValid(content) {
-	if (content.length !== 6) return false;
-	if (typeof content[0] !== "object" || typeof content[1] !== "object" || typeof content[2] !== "string" || typeof content[3] !== "number" || typeof content[4] !== "string" || typeof content[5] !== "object") return false;
-
-	return true;
-}
-
-/**
  * Checks if an IP address is currently rate limited.
  *
  * Gets the current rate limits from the database.
@@ -197,18 +178,31 @@ async function isRatelimited(ip) {
 	return false;
 }
 
+/**
+ * Checks if a user is using multiple accounts based on their IP address and Steam ID.
+ *
+ * Retrieves the locked accounts and user records from the database. If the user's account is locked, returns true.
+ * Otherwise, checks if the user has changed their IP address more than the configured `ipChangeTime`. If so, clears the
+ * user's IP address history and locks the account if the user has changed their IP more than 3 times. Updates the
+ * database with the new account status and returns the result.
+ *
+ * @param {string} ip The IP address of the user.
+ * @param {string} steamid The Steam ID of the user.
+ * @returns {Promise<boolean>} Whether the user is using multiple accounts.
+ */
 async function isMultiAccount(ip, steamid) {
 	const locked = await db.getData("/locked");
 	const records = await db.getData("/records");
 
 	if (locked[steamid]) return true;
 
-	if (!records[steamid]) records[steamid] = {
-		"ips": {
-			[ip]: true,
-		},
-		"lastchanged": Date.now(),
-	};
+	if (!records[steamid])
+		records[steamid] = {
+			ips: {
+				[ip]: true,
+			},
+			lastchanged: Date.now(),
+		};
 
 	// Clear IPs if the user has changed their ip more than ipChangeTime
 	if (Date.now() - records[steamid]["lastchanged"] > config.ipChangeTime) {
@@ -229,124 +223,37 @@ async function isMultiAccount(ip, steamid) {
 	return false;
 }
 
-/**
- * Generates a random string of the given length.
- *
- * @param {number} [length=32] The length of the random string to generate.
- * @returns {string} The generated random string.
- */
-function generateRandomString(length = 32) {
-	const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	const charactersLength = characters.length;
-	let counter = 0;
-	let result = "";
-
-	while (counter < length) {
-		result += characters.charAt(Math.floor(Math.random() * charactersLength));
-		counter += 1;
-	}
-
-	return result;
-}
-
-/**
- * Sanitizes a string by removing unwanted characters and replacing spaces with hyphens.
- *
- * @param {string} [string=""] The string to sanitize.
- * @param {boolean} [forceLowercase=true] Whether to force the string to lowercase.
- * @param {boolean} [strict=false] Whether to remove all non-alphanumeric characters.
- * @returns {string} The sanitized string.
- */
-function sanitize(string = "", forceLowercase = true, strict = false) {
-	string = string.toString();
-
-	const strip = ["~", "`", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "=", "+", "[", "{", "]", "}", "\\", "|", ";", ":", "\"", "'", "&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;", "â€”", "â€“", ",", "<", ".", ">", "/", "?"];
-
-	let clean = string.trim().replace(strip, "").replace(/\s+/g, "-");
-	clean = strict ? string.replace(/[^\u0400-\u04FF\w\d\s-]/g, "") : clean;
-
-	return forceLowercase ? clean.toLowerCase() : clean;
-}
-
-/**
- * Logs a message to a log file and optionally sends it to a Discord webhook.
- *
- * @param {string} logs_message - The message to be logged.
- * @param {string} discord_message - The message to be sent to the Discord webhook (optional).
- * @returns {Promise<boolean>} - A promise that resolves to `true` if the logging was successful, or `false` otherwise.
- */
-async function log(logs_message, discord_message) {
-	fs.writeFile("data/logs.log", `[${new Date(Date.now()).toLocaleString("ru-RU")}] - ${logs_message}\n`, { flag: "a" }, async err => {
-		if (err) throw err;
-
-		if (config.webhook_url)
-			await fetch(config.webhook_url, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					username: "Courses Logger",
-					content: discord_message ?? logs_message,
-				}),
-			});
-
-		return true;
-	});
-}
-
 // HTTP server
-
 const http = require("http");
 
-const port = normalizePort(config.port || "6547");
+const port = config.port || 6547;
 app.set("port", port);
 
 const server = http.createServer(app);
 
 server.listen(port);
-server.on("error", onError);
-server.on("listening", onListening);
 
-function normalizePort(val) {
-	const port = parseInt(val, 10);
-
-	if (isNaN(port)) {
-		// named pipe
-		return val;
-	}
-
-	if (port >= 0) {
-		// port number
-		return port;
-	}
-
-	return false;
-}
-
-function onError(error) {
+server.on("error", error => {
 	if (error.syscall !== "listen") throw error;
-
-	const bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
 
 	// handle specific listen errors with friendly messages
 	switch (error.code) {
 		case "EACCES":
-			console.error(bind + " requires elevated privileges");
+			console.error(`Port ${port} requires elevated privileges`);
 			process.exit(1);
 			break;
 		case "EADDRINUSE":
-			console.error(bind + " is already in use");
+			console.error(`Port ${port} is already in use`);
 			process.exit(1);
 			break;
 		default:
 			throw error;
 	}
-}
+});
 
-function onListening() {
+server.on("listening", () => {
 	const addr = server.address();
 	const bind = typeof addr === "string" ? "pipe: " + addr : "port: " + addr.port;
 
 	console.log("Now listening on " + bind);
-}
+});

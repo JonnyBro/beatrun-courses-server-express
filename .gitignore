@@ -4,6 +4,7 @@ public/courses/*
 data/*
 config.js
 !data/main_db.example.json
+
 # Logs
 logs
 *.log

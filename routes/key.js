@@ -2,6 +2,8 @@ const express = require("express"),
 	router = express.Router(),
 	fetch = require("node-fetch");
 
+const { sanitize } = require("../utils/functions");
+
 router.get("/", async (req, res) => {
 	if (req.user) req.user.authKey = await registerUser(req.app.locals, req.user);
 
@@ -39,7 +41,7 @@ async function registerUser(locals, user) {
 
 	const usernames = await locals.db.getData("/usernames");
 	const key = await locals.getKey(user);
-	const username = locals.sanitize(user.personaname, false, true);
+	const username = sanitize(user.personaname, false, true);
 
 	usernames[user.steamid] = username || "Unknown";
 	await locals.db.push("/usernames", usernames);
