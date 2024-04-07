@@ -183,6 +183,11 @@ router.post("/admin", isAdmin, async (req, res) => {
 
 		if (!key) return res.send({ success: false, message: "Internal error. Contact the developer." });
 
+		await log(
+			`[ADMIN] Added new user (Admin: ${req.user.steamid}, SteamID: ${target}, Key ${key}).`,
+			`[ADMIN] Added new user (Admin: \`${req.user.steamid}\`, SteamID: \`${target}\`, Key \`${key}\`).`,
+		);
+
 		res.send({ success: true, message: `Key added successfully.\n${key}` });
 	} else if (action === "removeKey") {
 		const keys = await req.app.locals.db.getData("/keys");
@@ -192,6 +197,11 @@ router.post("/admin", isAdmin, async (req, res) => {
 		delete keys[target.toUpperCase()];
 
 		await req.app.locals.db.push("/keys", keys);
+
+		await log(
+			`[ADMIN] Removed a user (Admin: ${req.user.steamid}, SteamID: ${target}).`,
+			`[ADMIN] Removed a user (Admin: \`${req.user.steamid}\`, SteamID: \`${target}\`).`,
+		);
 
 		res.send({ success: true, message: `Key removed successfully.\n${target.toUpperCase()}` });
 	} else if (action === "lockUser") {
@@ -203,6 +213,11 @@ router.post("/admin", isAdmin, async (req, res) => {
 
 		await req.app.locals.db.push("/locked", locked);
 
+		await log(
+			`[ADMIN] Locked a user (Admin: ${req.user.steamid}, SteamID: ${target}).`,
+			`[ADMIN] Locked a user (Admin: \`${req.user.steamid}\`, SteamID: \`${target}\`).`,
+		);
+
 		res.send({ success: true, message: `User is now locked.\n${target}` });
 	} else if (action === "unlockUser") {
 		const locked = await req.app.locals.db.getData("/locked");
@@ -212,6 +227,11 @@ router.post("/admin", isAdmin, async (req, res) => {
 		delete locked[target];
 
 		await req.app.locals.db.push("/locked", locked);
+
+		await log(
+			`[ADMIN] Unlocked a user (Admin: ${req.user.steamid}, SteamID: ${target}).`,
+			`[ADMIN] Unlocked a user (Admin: \`${req.user.steamid}\`, SteamID: \`${target}\`).`,
+		);
 
 		res.send({ success: true, message: `User is now unlocked.\n${target}` });
 	} else if (action === "removeCourse") {
@@ -223,6 +243,11 @@ router.post("/admin", isAdmin, async (req, res) => {
 		fs.unlinkSync(`public/courses/${target.toUpperCase()}.txt`);
 
 		await req.app.locals.db.push("/courses", courses);
+
+		await log(
+			`[ADMIN] Remove a course (Admin: ${req.user.steamid}, Course: ${target.toUpperCase()}).`,
+			`[ADMIN] Remove a course (Admin: \`${req.user.steamid}\`, Course: \`${target.toUpperCase()}\`).`,
+		);
 
 		res.send({ success: true, message: `Course removed successfully.\n${target.toUpperCase()}` });
 	} else if (action === "showLogs") {
