@@ -192,9 +192,9 @@ router.post("/admin", isAdmin, async (req, res) => {
 	} else if (action === "removeKey") {
 		const keys = await req.app.locals.db.getData("/keys");
 
-		if (!keys[target.toUpperCase()]) return res.send({ success: false, message: "Invalid key provided." });
+		if (!keys[target]) return res.send({ success: false, message: "Invalid SteamID provided." });
 
-		delete keys[target.toUpperCase()];
+		delete keys[target];
 
 		await req.app.locals.db.push("/keys", keys);
 
