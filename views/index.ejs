@@ -90,7 +90,7 @@
 				</div>
 				<% } else { %>
 				<div class="text-lg font-mono">
-					Welcome, <b class="hover:text-red-700"><%- locals.sanitize(user.personaname, false, true) %></b>!
+					Welcome, <b class="hover:text-red-700"><%- sanitize(user.personaname, false, true) %></b>!
 				</div>
 				<% } %>
 
