@@ -279,7 +279,7 @@ router.get("/stats/:code", async (req, res) => {
 	let course;
 
 	try {
-		course = await req.app.locals.db.getData(`/courses/${req.params.code}`);
+		course = await req.app.locals.db.getData(`/courses/${req.params.code.toUpperCase()}`);
 	} catch (e) {
 		return res.status(401).json({ res: res.statusCode, message: "Invalid course code provided." });
 	}
