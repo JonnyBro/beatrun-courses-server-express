@@ -15,11 +15,11 @@ router.get("/", isUser, async (req, res) => {
 });
 
 router.get("/download", isUserGame, async (req, res) => {
-	const headers = req.headers;
+	const { headers } = req;
 	if (!headers.code) return res.status(401).json({ res: res.statusCode, message: "No code provided. Please provide a valid course code." });
 	if (!headers.map) return res.status(401).json({ res: res.statusCode, message: "No map provided. Please provide a valid map." });
 
-	const ip = req.headers["cf-connecting-ip"] || "Unknown";
+	const ip = headers["cf-connecting-ip"] || "Unknown";
 	const key = headers.authorization;
 	const keys = await req.app.locals.db.getData("/keys");
 	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
@@ -31,7 +31,7 @@ router.get("/download", isUserGame, async (req, res) => {
 	let courseData;
 
 	try {
-		courseData = await req.app.locals.db.getData(`/courses/${headers.code}`);
+		courseData = await req.app.locals.db.getData(`/courses/${headers.code.toUpperCase()}`);
 	} catch (e) {
 		return res.status(401).json({ res: res.statusCode, message: "Invalid course code provided." });
 	}
@@ -41,25 +41,25 @@ router.get("/download", isUserGame, async (req, res) => {
 	const file = fs.readFileSync(`public/${courseData.path}`, "utf-8");
 
 	await log(
-		`[DOWNLOAD] Served a course for user (Course: ${headers.code}, SteamID: ${steamid}, Key ${key}).`,
-		`[DOWNLOAD] Served a course for user (Course: \`${headers.code}\`, SteamID: \`${steamid}\`, Key \`${key}\`).`,
+		`[DOWNLOAD] Served a course for user (Course: ${headers.code.toUpperCase()}, SteamID: ${steamid}, Key ${key}).`,
+		`[DOWNLOAD] Served a course for user (Course: \`${headers.code.toUpperCase()}\`, SteamID: \`${steamid}\`, Key \`${key}\`).`,
 	);
 
 	if (!courseData.plays) courseData.plays = 1;
 	else courseData.plays++;
 
-	await req.app.locals.db.push(`/courses/${headers.code}`, courseData);
+	await req.app.locals.db.push(`/courses/${headers.code.toUpperCase()}`, courseData);
 
 	res.send({ res: res.statusCode, file: file });
 });
 
 router.post("/upload", isUserGame, async (req, res) => {
-	const headers = req.headers;
+	const { headers } = req;
 	if (!headers.course) return res.status(401).json({ res: res.statusCode, message: "No course provided. Please provide a valid course." });
 	if (!headers.map) return res.status(401).json({ res: res.statusCode, message: "No map provided. Please provide a valid map." });
 	if (headers.mapid === null || headers.mapid === undefined) return res.status(401).json({ res: res.statusCode, message: "No map id provided. Please provide a valid map id." });
 
-	const ip = req.headers["cf-connecting-ip"] || "Unknown";
+	const ip = headers["cf-connecting-ip"] || "Unknown";
 	const key = headers.authorization;
 	const keys = await req.app.locals.db.getData("/keys");
 	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
@@ -112,12 +112,12 @@ router.post("/upload", isUserGame, async (req, res) => {
 });
 
 router.post("/update", isUserGame, async (req, res) => {
-	const headers = req.headers;
+	const { headers } = req;
 	if (!headers.course) return res.status(401).json({ res: res.statusCode, message: "No course provided. Please provide a valid course." });
 	if (!headers.map) return res.status(401).json({ res: res.statusCode, message: "No map provided. Please provide a valid map." });
 	if (!headers.code) return res.status(401).json({ res: res.statusCode, message: "No code provided. Please provide a valid course code." });
 
-	const ip = req.headers["cf-connecting-ip"] || "Unknown";
+	const ip = headers["cf-connecting-ip"] || "Unknown";
 	const key = headers.authorization;
 	const keys = await req.app.locals.db.getData("/keys");
 	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));
@@ -126,7 +126,7 @@ router.post("/update", isUserGame, async (req, res) => {
 	if (ip !== "Unknown" && (await req.app.locals.isRatelimited(ip))) return res.status(401).json({ message: "Too many requests. Please try again later." });
 	if (ip !== "Unknown" && (await req.app.locals.isMultiAccount(ip, steamid))) return res.status(401).json({ message: "Your account was detected as multiaccount. Please open a ticket on our Discord server." });
 
-	const courseData = await req.app.locals.db.getData(`/courses/${headers.code}`);
+	const courseData = await req.app.locals.db.getData(`/courses/${headers.code.toUpperCase()}`);
 
 	if (courseData.map !== headers.map) return res.status(401).json({ res: res.statusCode, message: "Invalid map. You should provide the same map as before." });
 	if (courseData.uploader.userid !== steamIds[key]) return res.status(401).json({ res: res.statusCode, message: "Invalid key. You are not the uploader of this course. Only the uploader can update their course." });
@@ -140,17 +140,17 @@ router.post("/update", isUserGame, async (req, res) => {
 
 	if (!isCourseFileValid(JSON.parse(course))) return res.status(401).json({ res: res.statusCode, message: "Invalid course file. Please provide a valid course." });
 
-	fs.writeFileSync(`public/courses/${headers.code}.txt`, course, "utf-8");
+	fs.writeFileSync(`public/courses/${headers.code.toUpperCase()}.txt`, course, "utf-8");
 
 	courseData.time = Date.now();
 
-	await req.app.locals.db.push(`/courses/${headers.code}`, courseData);
+	await req.app.locals.db.push(`/courses/${headers.code.toUpperCase()}`, courseData);
 
 	await log(
-		`[UPDATE] User updated a course (Course: ${headers.code}, SteamID: ${steamIds[key]}, Key ${key}).`,
-		`[UPDATE] User updated a course (Course: \`${headers.code}\`, SteamID: \`${steamIds[key]}\`, Key \`${key}\`).`,
+		`[UPDATE] User updated a course (Course: ${headers.code.toUpperCase()}, SteamID: ${steamIds[key]}, Key ${key}).`,
+		`[UPDATE] User updated a course (Course: \`${headers.code.toUpperCase()}\`, SteamID: \`${steamIds[key]}\`, Key \`${key}\`).`,
 	);
-	res.send({ res: res.statusCode, code: headers.code });
+	res.send({ res: res.statusCode, code: headers.code.toUpperCase() });
 });
 
 router.post("/rate", isUser, async (req, res) => {
@@ -275,7 +275,20 @@ router.get("/admin", isAdmin, async (req, res) => {
 	res.send("Hello get");
 });
 
-router.get("/stats/:code", async (req, res) => {
+router.get("/info/", async (req, res) => {
+	const courses = await req.app.locals.db.getData("/courses");
+	const usernames = await req.app.locals.db.getData("/usernames");
+
+	// eslint-disable-next-line no-unused-vars
+	for (const [code, data] of Object.entries(courses)) {
+		delete data.uploader.authkey;
+		data.uploader.name = usernames[data.uploader.userid];
+	}
+
+	res.send({ res: res.statusCode, data: courses });
+});
+
+router.get("/info/:code", async (req, res) => {
 	let course;
 
 	try {
@@ -289,7 +302,7 @@ router.get("/stats/:code", async (req, res) => {
 	delete course.uploader.authkey;
 	course.uploader.name = usernames[course.uploader.userid];
 
-	res.send({ res: res.statusCode, course: course });
+	res.send({ res: res.statusCode, data: course });
 });
 
 function generateCode() {

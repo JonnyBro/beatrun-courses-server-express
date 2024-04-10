@@ -33,18 +33,19 @@ router.get("/", async (req, res) => {
 
 	/* Sort Dropdown */
 	const sortOptions = {
-		0: "Date",
-		1: "Course Name",
-		2: "Map Name",
-		3: "Element count",
-		4: "Rating (Smart)",
-		5: "Rating (Dumb)",
+		time: "Date",
+		name: "Course Name",
+		map: "Map Name",
+		elements: "Element count",
+		scoresmart: "Rating (Smart)",
+		scoredumb: "Rating (Dumb)",
+		plays: "Plays",
 	};
 	let sortDropdown = "";
 
-	for (let i = 0; i <= 5; i++) {
-		if (sortType === i.toString()) sortDropdown += `<option selected value="${i}">${sortOptions[i]}</option>`;
-		else sortDropdown += `<option value="${i}">${sortOptions[i]}</option>`;
+	for (const [key, value] of Object.entries(sortOptions)) {
+		if (sortType === key) sortDropdown += `<option selected value="${key}">${value}</option>`;
+		else sortDropdown += `<option value="${key}">${value}</option>`;
 	}
 
 	/* Courses Cards */
@@ -100,20 +101,20 @@ router.get("/", async (req, res) => {
 			mapimg: codeMapImage,
 			mapwid: codeMapId,
 			time: codeData.time,
-			plays: codeData.plays,
+			plays: codeData.plays || 0,
 		});
 	});
 
 	let sortedCodesData = [];
 
 	const sortKeys = {
-		0: ["time", "DESC"],
-		1: ["name", "STRING"],
-		2: ["map", "STRING"],
-		3: ["elements", "DESC"],
-		4: ["scoresmart", "DESC"],
-		5: ["scoredumb", "DESC"],
-		6: ["plays", "DESC"],
+		time: "DESC",
+		name: "STRING",
+		map: "STRING",
+		elements: "DESC",
+		scoresmart: "DESC",
+		scoredumb: "DESC",
+		plays: "DESC",
 	};
 
 	if (sortType === "none")
@@ -123,13 +124,17 @@ router.get("/", async (req, res) => {
 	else {
 		const sortKey = sortKeys[sortType];
 
-		if (sortKey[1] === "STRING")
+		if (sortKey === "STRING")
 			sortedCodesData = codesData.sort((a, b) => {
-				return a[sortKey[0]].localeCompare(b[sortKey[0]]);
+				return a[sortType].localeCompare(b[sortType]);
 			});
-		else if (sortKey[1] === "DESC")
+		else if (sortKey === "ASC")
 			sortedCodesData = codesData.sort((a, b) => {
-				return b[sortKey[0]] - a[sortKey[0]];
+				return a[sortType] - b[sortType];
+			});
+		else if (sortKey === "DESC")
+			sortedCodesData = codesData.sort((a, b) => {
+				return b[sortType] - a[sortType];
 			});
 	}
 
