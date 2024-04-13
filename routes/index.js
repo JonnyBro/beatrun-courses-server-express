@@ -222,7 +222,7 @@ function generateCourseCard(course) {
 		"{mapImage}": course.mapimg,
 		"{mapID}": course.mapwid,
 		"{elementsCount}": course.elements === 1 ? "1 element" : `${course.elements} elements`,
-		"{uploadDate}": new Date(course.time).toLocaleString("ru-RU").split(", ")[0],
+		"{uploadDate}": new Date(course.time).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", year: "2-digit" }),
 		"{plays}": course.plays === 1 ? "1 play" : `${course.plays || 0} plays`,
 	};
 
