@@ -22,9 +22,9 @@
 				</div>
 			</div>
 			<div class="text-left">
-				<div class="tooltip" data-tip="Click to toggle SteamID">
+				<div class="tooltip" data-tip="Open Steam Profile">
 					<i class="fa-solid fa-user w-4"></i>
-					<a class="hover:text-yellow-400" href="#" onclick="event.preventDefault(); this.innerText === '{uploaderName}' ? this.innerText = '{uploaderID}' : this.innerText = '{uploaderName}'">{uploaderName}</a>
+					<a class="hover:text-yellow-400" href="https://steamcommunity.com/profiles/{uploaderID}">{uploaderName}</a>
 				</div>
 			</div>
 			<div class="text-left">
@@ -59,7 +59,7 @@
 				</a>
 			</div>
 			<br>
-			<div class="tooltip tooltip-left" data-tip="Open course info">
+			<div class="tooltip tooltip-left" data-tip="Open stats">
 				<a class="btn btn-square btn-ghost hover:text-yellow-400" href="/stats/{courseCode}">
 					<i class="fa-solid fa-info"></i>
 				</a>
