@@ -86,6 +86,23 @@ function generateRandomString(length = 32) {
 }
 
 /**
+ * Generates a unique random code string composed of 3 parts each consisting of 4 alphanumeric characters. The parts are separated by hyphens ("-").
+ *
+ * @returns {string} A unique random code string in the format "AAAA-BBBB-CCCC". Each part is exactly four alphanumeric characters long.
+ */
+function generateCode() {
+	let code = "";
+
+	for (let i = 0; i < 3; i++) {
+		code += generateRandomString(4);
+
+		if (i === 0 || i === 1) code += "-";
+	}
+
+	return code.toUpperCase();
+}
+
+/**
  * Sanitizes a string by removing unwanted characters and replacing spaces with hyphens.
  *
  * @param {string} [string=""] - The string to sanitize.
@@ -145,4 +162,4 @@ async function log(logs_message, discord_message) {
 	});
 }
 
-module.exports = { isAdmin, isUser, isUserGame, generateRandomString, sanitize, isCourseFileValid, log };
+module.exports = { isAdmin, isUser, isUserGame, generateRandomString, generateCode, sanitize, isCourseFileValid, log };

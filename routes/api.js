@@ -4,7 +4,8 @@ const express = require("express"),
 	openGraphScraper = require("open-graph-scraper"),
 	lzma = require("lzma");
 
-const { isAdmin, isUser, isUserGame, generateRandomString, isCourseFileValid, log } = require("../utils/functions");
+const { isAdmin, isUser, isUserGame, generateCode, isCourseFileValid, log } = require("../utils/functions"),
+	{ formidable } = require("formidable");
 
 router.post("/", isUser, async (req, res) => {
 	res.send("Hello World!");
@@ -105,10 +106,69 @@ router.post("/upload", isUserGame, async (req, res) => {
 	}, false);
 
 	await log(
-		`[UPLOAD] User uploaded a course (Course: ${code}, SteamID: ${steamIds[key]}, Key ${key}).`,
-		`[UPLOAD] User uploaded a course (Course: \`${code}\`, SteamID: \`${steamIds[key]}\`, Key \`${key}\`).`,
+		`[UPLOAD] User uploaded a course from the game (Course: ${code}, SteamID: ${steamIds[key]}, Key ${key}).`,
+		`[UPLOAD] User uploaded a course from the game (Course: \`${code}\`, SteamID: \`${steamIds[key]}\`, Key \`${key}\`).`,
 	);
 	res.send({ res: res.statusCode, code: code });
+});
+
+router.post("/upload_site", isUser, async (req, res) => {
+	const { headers, user } = req;
+	const ip = headers["cf-connecting-ip"] || "Unknown";
+
+	if (ip !== "Unknown" && (await req.app.locals.isRatelimited(ip))) return res.status(401).json({ res: res.statusCode, message: "Too many requests. Please try again later." });
+	if (ip !== "Unknown" && (await req.app.locals.isMultiAccount(ip, user.steamid))) return res.status(401).json({ res: res.statusCode, message: "Your account was detected as multiaccount. Please open a ticket on our Discord server." });
+
+	const form = formidable({ maxFileSize: 10 * 1024 * 1024 });
+
+	form.parse(req, async (err, fields, files) => {
+		if (err) return res.send("Error while uploading file. Please contact the administrator.");
+
+		const uploaded = fs.readFileSync(files.file.filepath);
+
+		let course = "";
+		try {
+			course = lzma.decompress(uploaded);
+		} catch (e) {
+			course = uploaded;
+		}
+
+		if (!isCourseFileValid(JSON.parse(course))) return res.status(401).json({ res: res.statusCode, message: "Invalid course file. Please provide a valid course." });
+
+		let code = generateCode();
+		let file = `public/courses/${code}.txt`;
+
+		do {
+			code = generateCode();
+			file = `public/courses/${code}.txt`;
+		} while (fs.existsSync(file));
+
+		fs.writeFileSync(file, course);
+
+		const mapid = fields.link.match(/id=(\d+)/)[1];
+		const mapImage = await openGraphScraper({ url: `https://steamcommunity.com/sharedfiles/filedetails/?id=${mapid}` }).then(data => data.result.ogImage[0].url);
+
+		await req.app.locals.db.push("/courses", {
+			[code]: {
+				map: fields.map,
+				uploader: {
+					authkey: user.authKey,
+					userid: user.steamid,
+				},
+				time: Date.now(),
+				path: `courses/${code}.txt`,
+				mapid: mapid,
+				mapimg: mapImage,
+				plays: 0,
+			},
+		}, false);
+
+		await log(
+			`[UPLOAD] User uploaded a course from the site (Course: ${code}, SteamID: ${user.steamid}, Key ${user.authKey}).`,
+			`[UPLOAD] User uploaded a course from the site (Course: \`${code}\`, SteamID: \`${user.steamid}\`, Key \`${user.authKey}\`).`,
+		);
+		res.send({ res: res.statusCode, code: code });
+	});
 });
 
 router.post("/update", isUserGame, async (req, res) => {
@@ -176,7 +236,8 @@ router.post("/rate", isUser, async (req, res) => {
 });
 
 router.post("/admin", isAdmin, async (req, res) => {
-	const { action, target } = req.body.args;
+	const { user } = req,
+		{ action, target } = req.body.args;
 
 	if (action === "addKey") {
 		const key = await req.app.locals.getKey(target);
@@ -184,8 +245,8 @@ router.post("/admin", isAdmin, async (req, res) => {
 		if (!key) return res.send({ success: false, message: "Internal error. Contact the developer." });
 
 		await log(
-			`[ADMIN] Added new user (Admin: ${req.user.steamid}, SteamID: ${target}, Key ${key}).`,
-			`[ADMIN] Added new user (Admin: \`${req.user.steamid}\`, SteamID: \`${target}\`, Key \`${key}\`).`,
+			`[ADMIN] Added new user (Admin: ${user.steamid}, SteamID: ${target}, Key ${key}).`,
+			`[ADMIN] Added new user (Admin: \`${user.steamid}\`, SteamID: \`${target}\`, Key \`${key}\`).`,
 		);
 
 		res.send({ success: true, message: `Key added successfully.\n${key}` });
@@ -199,8 +260,8 @@ router.post("/admin", isAdmin, async (req, res) => {
 		await req.app.locals.db.push("/keys", keys);
 
 		await log(
-			`[ADMIN] Removed a user (Admin: ${req.user.steamid}, SteamID: ${target}).`,
-			`[ADMIN] Removed a user (Admin: \`${req.user.steamid}\`, SteamID: \`${target}\`).`,
+			`[ADMIN] Removed a user (Admin: ${user.steamid}, SteamID: ${target}).`,
+			`[ADMIN] Removed a user (Admin: \`${user.steamid}\`, SteamID: \`${target}\`).`,
 		);
 
 		res.send({ success: true, message: `Key removed successfully.\n${target.toUpperCase()}` });
@@ -214,8 +275,8 @@ router.post("/admin", isAdmin, async (req, res) => {
 		await req.app.locals.db.push("/locked", locked);
 
 		await log(
-			`[ADMIN] Locked a user (Admin: ${req.user.steamid}, SteamID: ${target}).`,
-			`[ADMIN] Locked a user (Admin: \`${req.user.steamid}\`, SteamID: \`${target}\`).`,
+			`[ADMIN] Locked a user (Admin: ${user.steamid}, SteamID: ${target}).`,
+			`[ADMIN] Locked a user (Admin: \`${user.steamid}\`, SteamID: \`${target}\`).`,
 		);
 
 		res.send({ success: true, message: `User is now locked.\n${target}` });
@@ -229,8 +290,8 @@ router.post("/admin", isAdmin, async (req, res) => {
 		await req.app.locals.db.push("/locked", locked);
 
 		await log(
-			`[ADMIN] Unlocked a user (Admin: ${req.user.steamid}, SteamID: ${target}).`,
-			`[ADMIN] Unlocked a user (Admin: \`${req.user.steamid}\`, SteamID: \`${target}\`).`,
+			`[ADMIN] Unlocked a user (Admin: ${user.steamid}, SteamID: ${target}).`,
+			`[ADMIN] Unlocked a user (Admin: \`${user.steamid}\`, SteamID: \`${target}\`).`,
 		);
 
 		res.send({ success: true, message: `User is now unlocked.\n${target}` });
@@ -245,8 +306,8 @@ router.post("/admin", isAdmin, async (req, res) => {
 		await req.app.locals.db.push("/courses", courses);
 
 		await log(
-			`[ADMIN] Remove a course (Admin: ${req.user.steamid}, Course: ${target.toUpperCase()}).`,
-			`[ADMIN] Remove a course (Admin: \`${req.user.steamid}\`, Course: \`${target.toUpperCase()}\`).`,
+			`[ADMIN] Remove a course (Admin: ${user.steamid}, Course: ${target.toUpperCase()}).`,
+			`[ADMIN] Remove a course (Admin: \`${user.steamid}\`, Course: \`${target.toUpperCase()}\`).`,
 		);
 
 		res.send({ success: true, message: `Course removed successfully.\n${target.toUpperCase()}` });
@@ -304,17 +365,5 @@ router.get("/info/:code", async (req, res) => {
 
 	res.send({ res: res.statusCode, data: course });
 });
-
-function generateCode() {
-	let code = "";
-
-	for (let i = 0; i < 3; i++) {
-		code += generateRandomString(4);
-
-		if (i === 0 || i === 1) code += "-";
-	}
-
-	return code.toUpperCase();
-}
 
 module.exports = router;

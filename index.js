@@ -18,6 +18,7 @@ if (!fs.existsSync("public/courses/")) fs.mkdirSync("public/courses/");
 // Express App
 const indexRouter = require("./routes/index"),
 	keyRouter = require("./routes/key"),
+	uploadRouter = require("./routes/upload"),
 	adminRouter = require("./routes/admin"),
 	apiRouter = require("./routes/api"),
 	statsRouter = require("./routes/stats");
@@ -68,6 +69,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/key", keyRouter);
+app.use("/upload", uploadRouter);
 app.use("/admin", adminRouter);
 app.use("/api", apiRouter);
 app.use("/stats", statsRouter);

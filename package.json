@@ -7,10 +7,11 @@
 		"start": "node ."
 	},
 	"dependencies": {
-		"daisyui": "^4.9.0",
+		"daisyui": "^4.11.1",
 		"ejs": "^2.6.1",
 		"express": "^4.16.1",
 		"express-session": "^1.18.0",
+		"formidable": "^2.1.2",
 		"lzma": "^2.3.2",
 		"morgan": "^1.9.1",
 		"node-fetch": "^2.7.0",
