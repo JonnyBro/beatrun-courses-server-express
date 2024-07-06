@@ -14,3 +14,7 @@
 		scrollbar-width: none;  /* Firefox */
 	}
 }
+
+html {
+	@apply overflow-x-hidden;
+}

@@ -26,14 +26,14 @@
 	</style>
 </head>
 
-<body class="w-screen">
+<body class="w-screen font-mono">
 	<% include ../components/navbar.html %>
 
 	<div class="hero min-h-screen bg-base-200">
 		<div class="hero-content text-center">
 			<div class="text-center align-top w-full">
-				<div class="text-5xl font-bold font-mono">Authentication</div>
-				<div class="text-lg font-mono">Create your own API key here!</div>
+				<div class="text-5xl font-bold font-mono mb-2">Authentication</div>
+				<div class="text-lg font-mono mb-4">Create your own API key here!</div>
 
 				<% if (!user) { %>
 				<div class="pt-5 text-base font-mono text-left">
@@ -60,12 +60,12 @@
 				<div class="pt-5 font-mono text-left">
 					Great! Welcome to our little community.
 					<br>
-					<b>To get started, make sure you're using <a class="link link-warning" target="_blank" href="https://github.com/JonnyBro/beatrun">this</a> version of Beatrun!</b>
+					<b>To get started, make sure you're using <a class="link link-warning text-red-700 hover:text-red-500" target="_blank" href="https://github.com/JonnyBro/beatrun">this</a> version of Beatrun!</b>
 					<br><br>
 					<div class="font-mono text-left">
 						<strong>Your authkey is:</strong>
 						<div class="tooltip" data-tip="Click To Copy">
-							<a class="hover:text-red-300" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText(this.innerText)">
+							<a class="hover:text-red-700" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText(this.innerText)">
 								<%- user.authKey %>
 							</a>
 						</div>
@@ -74,7 +74,7 @@
 					Use this command below in console to save your API key in-game:
 					<br>
 					<div class="tooltip tooltip-right" data-tip="Click To Copy">
-						<a class="hover:text-red-300" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText(this.innerText)">
+						<a class="hover:text-red-700" href="#" onclick="event.preventDefault(); navigator.clipboard.writeText(this.innerText)">
 							<strong>Beatrun_Apikey <%- user.authKey %></strong>
 						</a>
 					</div>

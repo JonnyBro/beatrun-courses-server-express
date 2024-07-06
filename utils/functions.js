@@ -12,7 +12,7 @@ const fs = require("fs"),
  * @param {Function} next - The next middleware function to be called.
  */
 async function isAdmin(req, res, next) {
-	if (!req.user || !req.app.locals.admins[req.user.steamid]) return res.redirect("/key");
+	if (!req.user) return res.redirect("/key");
 
 	const admins = req.app.locals.admins;
 	const steamid = req.user.steamid;
@@ -32,7 +32,7 @@ async function isAdmin(req, res, next) {
  * @param {Function} next - The next middleware function to be called.
  */
 async function isUser(req, res, next) {
-	if (!req.user || !req.app.locals.admins[req.user.steamid]) return res.redirect("/key");
+	if (!req.user) return res.redirect("/key");
 
 	const keys = await req.app.locals.db.getData("/keys");
 	const steamIds = Object.fromEntries(Object.entries(keys).map(([k, v]) => [v, k]));

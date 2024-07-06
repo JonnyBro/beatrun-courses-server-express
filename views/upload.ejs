@@ -26,16 +26,16 @@
 	</style>
 </head>
 
-<body class="w-screen">
+<body class="w-screen font-mono">
 	<% include ../components/navbar.html %>
 
 	<div class="hero min-h-screen bg-base-200">
 		<div class="hero-content text-center">
 			<div class="text-center align-top w-full">
-				<div class="text-5xl font-bold font-mono">Uploading</div>
-				<div class="text-lg font-mono">Here you can upload your course!</div>
+				<div class="text-5xl font-bold font-mono mb-2">Uploading</div>
+				<div class="text-lg font-mono mb-4">Here you can upload your course!</div>
 
-				<form action="/api/upload_site" method="post" enctype="multipart/form-data" class="w-full max-w-sm">
+				<form action="/api/upload_site" method="post" enctype="multipart/form-data" class="w-full max-w-sm font-mono">
 					<div class="flex flex-col mt-4 space-y-2">
 						<input type="text" id="courseMap" name="map" placeholder="Enter course map..." required class="input input-bordered" />
 						<input type="url" id="mapLink" name="link" placeholder="Paste map link here..." required class="input input-bordered" />

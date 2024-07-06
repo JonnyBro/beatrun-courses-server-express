@@ -76,25 +76,21 @@
 	</script>
 </head>
 
-<body class="w-screen">
+<body class="w-screen font-mono">
 	<% include ../components/navbar.html %>
 
 	<div class="hero min-h-screen bg-base-200">
 		<div class="hero-content text-center">
 			<div class="text-center align-top w-full">
-				<div class="text-5xl font-bold font-mono">User submitted courses</div>
+				<div class="text-5xl font-bold font-mono mb-4">Courses</div>
 
 				<% if (!user) { %>
-				<div class="text-lg font-mono">
-					<a class="link link-warning" href="/key">Authorize with Steam</a> to load and upload these courses in-game!
-				</div>
-				<% } else { %>
-				<div class="text-lg font-mono">
-					Welcome, <b class="hover:text-red-700"><%- sanitize(user.personaname, false, true) %></b>!
+				<div class="text-lg font-mono mb-4">
+					<a class="link link-warning text-red-700 hover:text-red-500" href="/key">Authorize with Steam</a> to load and upload these courses in-game!
 				</div>
 				<% } %>
 
-				<div class="flex">
+				<div class="flex font-mono">
 					<div class="m-1">
 						<div class="label">
 							<span class="label-text">Page</span>

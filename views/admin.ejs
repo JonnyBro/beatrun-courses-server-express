@@ -46,47 +46,48 @@
 	</script>
 </head>
 
-<body class="w-screen">
+<body class="w-screen font-mono">
 	<% include ../components/navbar.html %>
 
 	<div class="hero min-h-screen bg-base-200">
 		<div class="hero-content text-center">
 			<div class="text-center align-top w-full">
-				<div class="text-5xl font-bold font-mono">User submitted courses</div>
-				<div class="pb-2 font-mono">I admin'd all over the place</div>
+				<div class="text-5xl font-bold font-mono mb-2">User submitted courses</div>
+				<div class="mb-4 font-mono">I admin'd all over the place</div>
 
 				<div class="flex">
 					<input class="input m-1" id="addKeyInput" type="text" placeholder="SteamID64" />
 					<input class="btn btn-primary m-1" type="submit" onclick="event.preventDefault(); sendAction({ action: 'addKey', target: document.getElementById('addKeyInput').value })" value="Add Key" />
 				</div>
-				<br>
+
 				<div class="flex">
 					<input class="input m-1" id="removeKeyInput" type="text" placeholder="SteamID64" />
 					<input class="btn btn-primary m-1" type="submit" onclick="event.preventDefault(); sendAction({ action: 'removeKey', target: document.getElementById('removeKeyInput').value })" value="Remove Key" />
 				</div>
-				<br>
+
 				<div class="flex">
 					<input class="input m-1" id="lockUserInput" type="text" placeholder="SteamID64" />
 					<input class="btn btn-primary m-1" type="submit" onclick="event.preventDefault(); sendAction({ action: 'lockUser', target: document.getElementById('lockUserInput').value })" value="Lock SteamID" />
 				</div>
-				<br>
+
 				<div class="flex">
 					<input class="input m-1" id="unlockUserInput" type="text" placeholder="SteamID64" />
 					<input class="btn btn-primary m-1" type="submit" onclick="event.preventDefault(); sendAction({ action: 'unlockUser', target: document.getElementById('unlockUserInput').value })" value="Unlock SteamID" />
 				</div>
-				<br>
+
 				<div class="flex">
 					<input class="input m-1" id="removeCourseInput" type="text" placeholder="Course Code" />
 					<input class="btn btn-primary m-1" type="submit" onclick="event.preventDefault(); sendAction({ action: 'removeCourse', target: document.getElementById('removeCourseInput').value })" value="Delete Course" />
 				</div>
-				<br>
+
 				<div class="flex">
 					<input class="btn btn-primary m-1" type="submit" id="showLogs" onclick="event.preventDefault(); sendAction({ action: 'showLogs' })" value="Show logs" />
 					<input class="btn btn-primary m-1" type="submit" id="showRecords" onclick="event.preventDefault(); sendAction({ action: 'showRecords' })" value="Show records" />
 					<input class="btn btn-primary m-1" type="submit" id="showLocks" onclick="event.preventDefault(); sendAction({ action: 'showLocks' })" value="Show locks" />
 				</div>
+
 				<br>
-				<br>
+
 				<div class="text-left">
 					Server response:<br>
 					<div class="mockup-window border border-base-300">
