@@ -25,10 +25,24 @@ const indexRouter = require("./routes/index"),
 
 const app = express();
 
+/**
+ * Callback to serialize user into session.
+ * It is called at end of request in authenticate method after successful authentication.
+ * This method will store necessary data from the authenticated user object (`user`).
+ * @param {Object} user - The authenticated user.
+ * @param {Function} done - Callback to signal success or failure for saving session data.
+ */
 passport.serializeUser((user, done) => {
 	done(null, user._json);
 });
 
+/**
+ * Callback to deserialize user from session.
+ * It is called at the start of each request in authenticate method after receiving client's request.
+ * This method will reconstruct a User object (`user`) based on data stored during `serializeUser` call.
+ * @param  {Object} obj - The serialized user data from session.
+ * @param  {Function} done - Callback to signal success or failure for loading user.
+ */
 passport.deserializeUser((obj, done) => {
 	done(null, obj);
 });
@@ -83,17 +97,17 @@ app.get("/auth/logout", (req, res, next) => {
 	});
 });
 
-// catch 404 and forward to error handler
-// app.use(function (req, res, next) {
-// 	next(createError(404));
-// });
+/* catch 404 and forward to error handler
+app.use(function (req, res, next) {
+	next(createError(404));
+});
 
-// // Error Handler
-// app.use(function (err, req, res) {
-// 	// render the error page
-// 	res.status(err.status || 500);
-// 	res.render("error");
-// });
+// Error Handler
+app.use(function (err, req, res) {
+	res.status(err.status || 500);
+	res.render("error");
+});
+*/
 
 // Locals
 db.getData("/admins").then(data => {

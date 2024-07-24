@@ -91,39 +91,23 @@
 				<% } %>
 
 				<div class="flex font-mono">
-					<div class="m-1">
-						<div class="label">
-							<span class="label-text">Page</span>
+					<div class="join">
+						<div>
+							<div>
+								<input class="input input-bordered join-item" id="searchQuery" type="text" placeholder="Search" onkeyup="if (event.key === 'Enter') update();" />
+							</div>
 						</div>
-						<select class="select" id="pageSelect" onchange="update();">
+						<select class="select select-bordered join-item" id="pageSelect" onchange="update();">
+							<option disabled selected>Page</option>
 							<%- pagesDropdown %>
 						</select>
-					</div>
-
-					<div class="m-1">
-						<div class="label">
-							<span class="label-text">Sorting</span>
-						</div>
-						<select class="select" id="sortValue" onchange="update();">
+						<select class="select select-bordered join-item" id="sortValue" onchange="update();">
+							<option disabled selected>Sort by</option>
 							<%- sortDropdown %>
 						</select>
-					</div>
-
-					<div class="m-1">
-						<div class="label">
-							<span class="label-text">Search</span>
+						<div class="indicator">
+							<a class="btn btn-primary join-team hover:bg-red-700" href="/">Clear</a>
 						</div>
-						<input class="input w-full max-w-xs" id="searchQuery" type="text" placeholder="Type here" onkeyup="if (event.key === 'Enter') update();" />
-						<script>
-							document.getElementById('searchQuery').value = '<%= searchText %>'
-						</script>
-					</div>
-
-					<div class="m-1">
-						<div class="label">
-							<span class="label-text" style="opacity: 0%;">no text</span>
-						</div>
-						<a class="btn btn-primary hover:bg-red-700" href="/">Clear</a>
 					</div>
 				</div>
 

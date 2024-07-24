@@ -22,6 +22,7 @@ router.get("/", async (req, res) => {
 	const coursesCount = Object.keys(courses).length;
 	const pagesCount = Math.max(Math.ceil(coursesCount / 20), 0);
 
+	if (page === "Page") page = 1;
 	if (page * 20 - coursesCount >= 20) page = 1;
 
 	let pagesDropdown = "";
@@ -117,7 +118,7 @@ router.get("/", async (req, res) => {
 		plays: "DESC",
 	};
 
-	if (sortType === "none")
+	if (sortType === "none" || sortType === "Sort")
 		sortedCodesData = codesData.sort((a, b) => {
 			return b.time - a.time;
 		});
