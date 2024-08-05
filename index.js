@@ -162,9 +162,11 @@ async function _createKey(user) {
 	if (!isFound) {
 		keys[user] = key;
 
+		const now = Date.now();
+
 		await log(
-			`[KEY] New user (SteamID: ${user}, TimeCreated: ${typeof user === "string" ? "Unknown" : user.timecreated}, Key: ${key}).`,
-			`[KEY] New user (SteamID: \`${user}\`, TimeCreated: \`${typeof user === "string" ? "Unknown" : user.timecreated}\`, Key: \`${key}\`).`,
+			`[KEY] New user (SteamID: ${user}, Key: ${key}, TimeCreated: <t:${now}:f>).`,
+			`[KEY] New user (SteamID: \`${user}\`, Key: \`${key}\`, TimeCreated: <t:${now}:f>).`,
 		);
 		await db.push("/keys", keys);
 
