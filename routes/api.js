@@ -239,9 +239,9 @@ router.post("/admin", isAdmin, async (req, res) => {
 	const { user } = req,
 		{ action, target } = req.body.args;
 
-	if (!target) return res.send({ success: false, message: "Target not provided. Please provide a target." });
-
 	if (action === "addKey") {
+		if (!target) return res.send({ success: false, message: "Target not provided. Please provide a target." });
+
 		const key = await req.app.locals.getKey(target);
 
 		if (!key) return res.send({ success: false, message: "Internal error. Contact the developer." });
@@ -253,6 +253,8 @@ router.post("/admin", isAdmin, async (req, res) => {
 
 		res.send({ success: true, message: `Key added successfully.\n${key}` });
 	} else if (action === "removeKey") {
+		if (!target) return res.send({ success: false, message: "Target not provided. Please provide a target." });
+
 		const keys = await req.app.locals.db.getData("/keys");
 
 		if (!keys[target]) return res.send({ success: false, message: "Invalid SteamID provided." });
@@ -268,6 +270,8 @@ router.post("/admin", isAdmin, async (req, res) => {
 
 		res.send({ success: true, message: `Key removed successfully.\n${target.toUpperCase()}` });
 	} else if (action === "lockUser") {
+		if (!target) return res.send({ success: false, message: "Target not provided. Please provide a target." });
+
 		const locked = await req.app.locals.db.getData("/locked");
 
 		if (locked[target]) return res.send({ success: false, message: "User is already locked." });
@@ -283,6 +287,8 @@ router.post("/admin", isAdmin, async (req, res) => {
 
 		res.send({ success: true, message: `User is now locked.\n${target}` });
 	} else if (action === "unlockUser") {
+		if (!target) return res.send({ success: false, message: "Target not provided. Please provide a target." });
+
 		const locked = await req.app.locals.db.getData("/locked");
 
 		if (!locked[target]) return res.send({ success: false, message: "User is not locked." });
@@ -298,6 +304,8 @@ router.post("/admin", isAdmin, async (req, res) => {
 
 		res.send({ success: true, message: `User is now unlocked.\n${target}` });
 	} else if (action === "removeCourse") {
+		if (!target) return res.send({ success: false, message: "Target not provided. Please provide a target." });
+
 		const courses = await req.app.locals.db.getData("/courses");
 
 		if (!courses[target.toUpperCase()]) return res.send({ success: false, message: "Invalid course code provided." });
