@@ -239,6 +239,8 @@ router.post("/admin", isAdmin, async (req, res) => {
 	const { user } = req,
 		{ action, target } = req.body.args;
 
+	if (!target) return res.send({ success: false, message: "Target not provided. Please provide a target." });
+
 	if (action === "addKey") {
 		const key = await req.app.locals.getKey(target);
 
@@ -336,7 +338,7 @@ router.get("/admin", isAdmin, async (req, res) => {
 	res.send("Hello get");
 });
 
-router.get("/info/", async (req, res) => {
+router.get("/info", async (req, res) => {
 	const courses = await req.app.locals.db.getData("/courses");
 	const usernames = await req.app.locals.db.getData("/usernames");
 

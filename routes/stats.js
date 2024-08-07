@@ -20,12 +20,12 @@ router.get("/:code", async (req, res) => {
 	course.name = courseFile[4];
 	course.objectCount = courseFile[0].length + courseFile[5].length;
 	course.checkpointsCount = courseFile[1].length;
-	course.code = req.params.code;
 	course.date = new Date(course.time).toLocaleString();
 
 	res.render("stats", {
 		user: req.user,
 		locals: req.app.locals,
+		code: req.params.code,
 		course,
 	});
 });

@@ -28,12 +28,12 @@
 
 <body class="w-screen font-mono">
 	<% include ../components/navbar.html %>
-
+	<%- console.log(course) %>
 	<div class="hero min-h-screen bg-base-200">
 		<div class="hero-content text-center">
 			<div class="text-center align-top w-full">
 				<div class="text-5xl font-bold font-mono mb-2"><%= course.name %></div>
-				<div class="text-lg font-mono mb-4"><%= course.code %></div>
+				<div class="text-lg font-mono mb-4"><%= code %></div>
 
 				<div class="stats stats-vertical lg:stats-horizontal shadow">
 					<div class="stat">
