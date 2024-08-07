@@ -146,7 +146,7 @@ async function log(logs_message, discord_message) {
 	fs.writeFile("data/logs.log", `[${new Date(Date.now()).toLocaleString("ru-RU")}] - ${logs_message}\n`, { flag: "a" }, async err => {
 		if (err) throw err;
 
-		if (config.webhook_url)
+		if (discord_message && config.webhook_url)
 			await fetch(config.webhook_url, {
 				method: "POST",
 				headers: {
