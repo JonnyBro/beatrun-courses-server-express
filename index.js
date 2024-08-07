@@ -165,8 +165,8 @@ async function _createKey(user) {
 		const now = Date.now();
 
 		await log(
-			`[KEY] New user (SteamID: ${user}, Key: ${key}, TimeCreated: <t:${now}:f>).`,
-			`[KEY] New user (SteamID: \`${user}\`, Key: \`${key}\`, TimeCreated: <t:${now}:f>).`,
+			`[KEY] New user (SteamID: ${user}, Key: ${key}, TimeCreated: ${new Date(now).toLocaleString("ru-RU")}).`,
+			`[KEY] New user (SteamID: \`${user}\`, Key: \`${key}\`, TimeCreated: <t:${Math.floor(now / 1000)}:f>).`,
 		);
 		await db.push("/keys", keys);
 
