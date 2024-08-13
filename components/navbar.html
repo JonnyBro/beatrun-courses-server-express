@@ -22,7 +22,12 @@
 					Our Discord
 				</a>
 			</li>
-			<a class="btn btn-sm btn-primary hover:bg-red-700" href="/key">Login</a>
+			<% if (user) { %>
+				<a class="btn btn-sm btn-primary hover:bg-red-700" href="/key"><%= user.personaname %></a>
+				<a class="btn btn-sm btn-primary hover:bg-red-700" href="/upload">Upload</a>
+			<% } else { %>
+				<a class="btn btn-sm btn-primary hover:bg-red-700" href="/key">Login</a>
+			<% } %>
 			<% if (user && locals.admins[user.steamid]) { %>
 				<a class="btn btn-sm btn-primary hover:bg-red-700" href="/admin">Admin</a>
 			<% } %>
